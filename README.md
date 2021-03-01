@@ -1,21 +1,8 @@
 # Mimicry
 
-**TODO: Add description**
+A small server for generating ad hoc mock servers based on a specification.
 
-## Installation
+For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `mimicry` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:mimicry, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/mimicry](https://hexdocs.pm/mimicry).
+:warning: This is an idea at the moment, which I invest some free time into. Come back later, if you like :wink:
 
