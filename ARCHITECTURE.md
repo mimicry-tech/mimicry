@@ -7,5 +7,5 @@ Well, nothing much to see here as of yet.
 Given an OpenAPIv3 specification, `mimicry` will generate an on-demand mock server which can be used to test requests against, hopefully alleviating the duty of mock dependencies yourself.
 
 Basic picture:
+![mimicry architecture](https://user-images.githubusercontent.com/498241/109551535-f9f06680-7ad0-11eb-838c-983d8bad2397.png)
 
-![mimicry architecture](https://user-images.githubusercontent.com/498241/109550850-193ac400-7ad0-11eb-8341-a2663b745401.png)
