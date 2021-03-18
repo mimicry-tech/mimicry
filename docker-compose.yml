@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  dev:
+    build:
+      context: .
+      target: dev
+    stdin_open: true
+    tty: true
+    command: ./bin/start_dev_server
+    volumes:
+      - .:/app
+    ports:
+      - "4000:4000"
