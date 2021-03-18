@@ -3,16 +3,10 @@ defmodule Mimicry do
   Documentation for `Mimicry`.
   """
 
-  @doc """
-  Hello world.
+  def code_name, do: "Ditto"
 
-  ## Examples
-
-      iex> Mimicry.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def version do
+    Application.spec(:mimicry, :vsn)
+    |> to_string()
   end
 end
