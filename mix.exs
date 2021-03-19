@@ -34,6 +34,7 @@ defmodule Mimicry.MixProject do
       {:jason, "~> 1.0"},
       {:phoenix, "~> 1.5"},
       {:plug_cowboy, "~> 2.4"},
+      {:yaml_elixir, "~> 2.6"},
 
       # dev
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},

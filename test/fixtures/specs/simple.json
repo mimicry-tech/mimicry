@@ -1,0 +1,18 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Test",
+    "version": "1.0",
+    "license": {
+      "name": "MIT"
+    },
+    "description": "A simple API"
+  },
+  "servers": [
+    {
+      "url": "https://simple-api.com",
+      "description": "production"
+    }
+  ],
+  "paths": []
+}
