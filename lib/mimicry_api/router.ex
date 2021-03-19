@@ -6,7 +6,7 @@ defmodule MimicryApi.Router do
   end
 
   scope "/", MimicryApi do
-    scope "/__meta" do
+    scope "/__mimicry" do
       get("/version", VersionController, :show)
       get("/servers", ServerController, :index)
     end
