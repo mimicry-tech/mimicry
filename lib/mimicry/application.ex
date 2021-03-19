@@ -5,7 +5,9 @@ defmodule Mimicry.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      MimicryApi.Endpoint
+      MimicryApi.Endpoint,
+      # Start the supervisor for creating additional servers
+      Mimicry.MockServer
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
