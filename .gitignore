@@ -24,3 +24,6 @@ mimicry-*.tar
 
 /config/dev.exs
 
+# default location for specification files
+/specs
+

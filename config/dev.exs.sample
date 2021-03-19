@@ -11,3 +11,5 @@ config :mimicry, MimicryApi.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: []
+
+config :mimicry, MimicryParser.Parser, folder: "./specs/"
