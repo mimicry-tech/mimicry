@@ -3,12 +3,12 @@ defmodule MimicryApi.Router do
 
   pipeline :api do
     plug(:accepts, ["json"])
-
-    plug(:protect_from_forgery)
-    plug(:put_secure_browser_headers)
   end
 
   scope "/", MimicryApi do
-    get("/", VersionController, :show)
+    scope "/__meta" do
+      get("/version", VersionController, :show)
+      get("/servers", ServerController, :index)
+    end
   end
 end
