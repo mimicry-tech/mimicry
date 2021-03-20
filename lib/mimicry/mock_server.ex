@@ -30,14 +30,18 @@ defmodule Mimicry.MockServer do
     GenServer.start_link(__MODULE__, [servers: servers], name: __MODULE__)
   end
 
+  @impl true
   def init(state) do
     {:ok, state}
   end
 
-  def handle_call(:list, _from, _state) do
-    {:reply, [], []}
+  @impl true
+  def handle_call(:list, _from, state) do
+    servers = state |> Keyword.get(:servers)
+    {:reply, servers, state}
   end
 
+  @impl true
   def handle_call(:create, _from, _state) do
     {:reply, [], []}
   end
