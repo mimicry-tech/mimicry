@@ -5,6 +5,7 @@ defmodule MimicryApi.Endpoint do
     plug(Phoenix.CodeReloader)
   end
 
+  plug(MimicryApi.ResponseHeaders)
   plug(Plug.RequestId)
 
   plug(Plug.Parsers,

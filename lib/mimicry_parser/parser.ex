@@ -58,7 +58,10 @@ defmodule MimicryParser.Parser do
     |> Enum.uniq_by(&duplicate_condition/1)
   end
 
-  defp duplicate_condition(%{"info" => %{"title" => title}}), do: title
+  defp duplicate_condition(%{"info" => %{"title" => title, "version" => version}}) do
+    "#{title}-#{version}"
+  end
+
   defp duplicate_condition(_), do: 0
 
   @doc """

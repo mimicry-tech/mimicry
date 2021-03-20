@@ -6,9 +6,10 @@ defmodule MimicryApi.Router do
   end
 
   scope "/", MimicryApi do
+    get("/", ProxyController, :show)
+
     scope "/__mimicry" do
-      get("/version", VersionController, :show)
-      get("/servers", ServerController, :index)
+      get("/", ServerController, :index)
     end
   end
 end
