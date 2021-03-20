@@ -23,6 +23,8 @@ defmodule MimicryParser.Parser do
   @spec parse(Specification.t()) :: map() | nil
   def parse(spec)
 
+  def parse(nil), do: nil
+
   def parse(_spec = %Specification{contents: contents, extension: :yaml}) do
     case contents |> YamlElixir.read_from_string() do
       {:ok, decoded} ->
@@ -41,6 +43,23 @@ defmodule MimicryParser.Parser do
   end
 
   def parse(_), do: nil
+
+  @doc """
+  Removes duplicate servers from a list
+
+  For now, the server with the same titles are considered duplicates
+  """
+  @spec deduplicate(list()) :: list()
+  def deduplicate([]), do: []
+
+  def deduplicate(servers) do
+    servers
+    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.uniq_by(&duplicate_condition/1)
+  end
+
+  defp duplicate_condition(%{"info" => %{"title" => title}}), do: title
+  defp duplicate_condition(_), do: 0
 
   @doc """
   Gets the path to read specifications from, falls back to File.cwd!/0

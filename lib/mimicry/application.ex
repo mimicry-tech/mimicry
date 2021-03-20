@@ -1,5 +1,6 @@
 defmodule Mimicry.Application do
   use Application
+  alias MimicryParser.Loader
 
   def start(_type, _args) do
     # List all child processes to be supervised
@@ -7,7 +8,7 @@ defmodule Mimicry.Application do
       # Start the endpoint when the application starts
       MimicryApi.Endpoint,
       # Start the supervisor for creating additional servers
-      Mimicry.MockServer
+      {Mimicry.MockServer, [%{servers: create_initial_servers()}]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -22,4 +23,6 @@ defmodule Mimicry.Application do
     MimicryApi.Endpoint.config_change(changed, removed)
     :ok
   end
+
+  defp create_initial_servers(), do: Loader.load_from_spec_folder()
 end

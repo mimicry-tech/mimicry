@@ -5,6 +5,8 @@ defmodule Mimicry.MockServer do
   """
   use GenServer
 
+  ## Boundary
+
   @doc """
   retrieves the list of currently available servers
   """
@@ -16,12 +18,16 @@ defmodule Mimicry.MockServer do
     GenServer.call(__MODULE__, :create)
   end
 
+  ## /Boundary
+
+  ## GenServer Callbacks
+
   @doc """
   starts the Mock Server Supervisor, which is used to start other processes
   representing individually created mock servers for users.
   """
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  def start_link([%{servers: servers}]) do
+    GenServer.start_link(__MODULE__, [servers: servers], name: __MODULE__)
   end
 
   def init(state) do
