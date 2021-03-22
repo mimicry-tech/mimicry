@@ -10,6 +10,8 @@ defmodule MimicryApi.Router do
       get("/", ServerController, :index)
       post("/", ServerController, :create)
       delete("/:id", ServerController, :delete)
+
+      get("/*path", ServerController, :show)
     end
 
     get("/*path", ProxyController, :show)

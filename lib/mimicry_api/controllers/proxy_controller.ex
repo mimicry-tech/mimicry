@@ -1,7 +1,7 @@
 defmodule MimicryApi.ProxyController do
   use MimicryApi, :controller
 
-  alias Mimicry.MockServerSupervisor
+  alias Mimicry.MockServerList
 
   import MimicryApi.Response, only: [respond_with_mimicry: 3]
 
@@ -9,12 +9,12 @@ defmodule MimicryApi.ProxyController do
     case conn |> get_req_header("x-mimicry-host") do
       # NOTE: we're taking the first occurence of the header value
       [host | _hosts] ->
-        case MockServerSupervisor.find_server(%{host: host}) do
+        case MockServerList.find_server(host) do
           {:ok, pid} ->
             response = conn |> respond_with_mimicry(pid, params)
             conn |> json(response)
 
-          {:error, nil} ->
+          {:error, :not_found} ->
             conn |> put_status(:not_found) |> json(%{error: "No such API available!"})
         end
 
