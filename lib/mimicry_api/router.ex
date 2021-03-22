@@ -10,6 +10,7 @@ defmodule MimicryApi.Router do
 
     scope "/__mimicry" do
       get("/", ServerController, :index)
+      post("/", ServerController, :create)
     end
   end
 end

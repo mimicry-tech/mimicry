@@ -12,12 +12,12 @@ defmodule Mimicry.MockServerSupervisor do
   @doc """
   retrieves the list of currently available servers
   """
-  def list_servers(_params \\ %{}) do
-    GenServer.call(__MODULE__, :list)
+  def list_servers(params \\ %{}) do
+    GenServer.call(__MODULE__, {:list, params})
   end
 
-  def create_server(_params = %{}) do
-    GenServer.call(__MODULE__, :create)
+  def create_server(spec = %{}) do
+    GenServer.call(__MODULE__, {:create, spec})
   end
 
   ## /Boundary
@@ -46,23 +46,28 @@ defmodule Mimicry.MockServerSupervisor do
   end
 
   @impl true
-  def handle_call(:list, _from, state) do
+  def handle_call({:list, _params}, _from, state) do
     servers =
       state
       |> Keyword.get(:servers)
       |> Enum.map(fn pid ->
-        %{
-          spec: :sys.get_state(pid) |> Keyword.get(:spec),
-          id: :sys.get_state(pid) |> Keyword.get(:id)
-        }
+        pid |> :sys.get_state() |> Keyword.take([:spec, :id]) |> Enum.into(%{})
       end)
 
     {:reply, servers, state}
   end
 
   @impl true
-  def handle_call(:create, _from, _state) do
-    {:reply, [], []}
+  def handle_call({:create, spec}, _from, servers: servers) do
+    id = create_id(spec)
+
+    case GenServer.start_link(MockServer, [spec: spec, id: id], name: id) do
+      {:ok, pid} ->
+        {:reply, {:ok, %{spec: spec, id: id}}, [servers: [pid | servers]]}
+
+      {:error, {:already_started, _pid}} ->
+        {:reply, {:ok, %{spec: spec, id: id}}, [servers: servers]}
+    end
   end
 
   defp create_id(%{"info" => %{"title" => title, "version" => version}}) do
