@@ -24,3 +24,5 @@ mimicry-*.tar
 
 /config/dev.exs
 
+/.iex.custom.exs
+

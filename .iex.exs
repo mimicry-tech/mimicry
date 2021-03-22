@@ -6,4 +6,4 @@ alias Mimicry.{MockServer, MockServerSupervisor}
 import_file_if_available("~/.iex.exs")
 
 # additional mountable local .iex.exs
-import_file_if_available("./iex.custom.exs")
+import_file_if_available("./.iex.custom.exs")
