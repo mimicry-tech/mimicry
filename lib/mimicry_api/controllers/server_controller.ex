@@ -26,6 +26,16 @@ defmodule MimicryApi.ServerController do
     |> json(%{message: "Can't do nothing with this, did you pass a spec?"})
   end
 
-  def delete(_conn, _params) do
+  def delete(conn, %{"id" => id}) do
+    case MockServerSupervisor.delete_server(id) do
+      [] ->
+        conn |> put_status(:not_found) |> json(%{message: "Not found"})
+
+      %{id: _, spec: _} = spec ->
+        conn |> json(spec)
+
+      _ ->
+        conn |> put_status(:bad_request) |> json(%{message: "something went wrong"})
+    end
   end
 end

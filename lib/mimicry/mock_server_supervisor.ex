@@ -12,12 +12,16 @@ defmodule Mimicry.MockServerSupervisor do
   @doc """
   retrieves the list of currently available servers
   """
-  def list_servers(params \\ %{}) do
-    GenServer.call(__MODULE__, {:list, params})
+  def list_servers() do
+    GenServer.call(__MODULE__, :list)
   end
 
   def create_server(spec = %{}) do
     GenServer.call(__MODULE__, {:create, spec})
+  end
+
+  def delete_server(id) do
+    GenServer.call(__MODULE__, {:delete, id |> String.to_atom()})
   end
 
   ## /Boundary
@@ -46,10 +50,10 @@ defmodule Mimicry.MockServerSupervisor do
   end
 
   @impl true
-  def handle_call({:list, _params}, _from, state) do
+  def handle_call(:list, _from, state) do
     servers =
       state
-      |> Keyword.get(:servers)
+      |> Keyword.get(:servers, [])
       |> Enum.map(fn pid ->
         pid |> :sys.get_state() |> Keyword.take([:spec, :id]) |> Enum.into(%{})
       end)
@@ -63,10 +67,33 @@ defmodule Mimicry.MockServerSupervisor do
 
     case GenServer.start_link(MockServer, [spec: spec, id: id], name: id) do
       {:ok, pid} ->
+        # respond with the new server
         {:reply, {:ok, %{spec: spec, id: id}}, [servers: [pid | servers]]}
 
       {:error, {:already_started, _pid}} ->
+        # respond with the existing server
         {:reply, {:ok, %{spec: spec, id: id}}, [servers: servers]}
+    end
+  end
+
+  @impl true
+  def handle_call({:delete, id}, _from, servers: servers) do
+    servers
+    |> Enum.map(&:sys.get_state(&1))
+    |> Enum.filter(fn state -> state[:id] == id end)
+    |> case do
+      [] ->
+        # nothing to do
+        {:reply, [], [servers: servers]}
+
+      [server] ->
+        # remove the server and respond with it
+        new_servers =
+          servers
+          |> Enum.map(&:sys.get_state(&1))
+          |> Enum.filter(fn server -> server[:id] != id end)
+
+        {:reply, server |> Keyword.take([:spec, :id]) |> Enum.into(%{}), [servers: new_servers]}
     end
   end
 

@@ -11,6 +11,7 @@ defmodule MimicryApi.Router do
     scope "/__mimicry" do
       get("/", ServerController, :index)
       post("/", ServerController, :create)
+      delete("/:id", ServerController, :delete)
     end
   end
 end
