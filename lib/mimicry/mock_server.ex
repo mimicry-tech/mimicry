@@ -1,48 +1,18 @@
 defmodule Mimicry.MockServer do
   @moduledoc """
-  The MockServer is the main entrypoint for creating servers on demand
-  that will respond to other messages.
+  `MockServer` realizes a single API server pretending to be some API based on a given OpenAPIv3 specification.
   """
   use GenServer
 
-  ## Boundary
-
-  @doc """
-  retrieves the list of currently available servers
-  """
-  def list_servers(_params \\ %{}) do
-    GenServer.call(__MODULE__, :list)
-  end
-
-  def create_server(_params = %{}) do
-    GenServer.call(__MODULE__, :create)
-  end
-
-  ## /Boundary
-
-  ## GenServer Callbacks
-
-  @doc """
-  starts the Mock Server Supervisor, which is used to start other processes
-  representing individually created mock servers for users.
-  """
-  def start_link([%{servers: servers}]) do
-    GenServer.start_link(__MODULE__, [servers: servers], name: __MODULE__)
+  def call_route(params) do
+    GenServer.call(__MODULE__, :call_route, params)
   end
 
   @impl true
-  def init(state) do
-    {:ok, state}
-  end
+  def init(state), do: {:ok, state}
 
   @impl true
-  def handle_call(:list, _from, state) do
-    servers = state |> Keyword.get(:servers)
-    {:reply, servers, state}
-  end
-
-  @impl true
-  def handle_call(:create, _from, _state) do
-    {:reply, [], []}
+  def handle_call(:call_route, _from, state) do
+    {:reply, nil, state}
   end
 end

@@ -1,6 +1,6 @@
 # project specific stuff
 alias MimicryParser.Parser
-alias Mimicry.MockServer
+alias Mimicry.{MockServer, MockServerSupervisor}
 
 # only relevant outside docker, e.g. when running locally
 import_file_if_available("~/.iex.exs")
