@@ -24,6 +24,10 @@ defmodule Mimicry.MockServerSupervisor do
     GenServer.call(__MODULE__, {:delete, id |> String.to_atom()})
   end
 
+  def find_server(%{host: host}) do
+    GenServer.call(__MODULE__, {:find, host})
+  end
+
   ## /Boundary
 
   ## GenServer Callbacks
@@ -94,6 +98,22 @@ defmodule Mimicry.MockServerSupervisor do
           |> Enum.filter(fn server -> server[:id] != id end)
 
         {:reply, server |> Keyword.take([:spec, :id]) |> Enum.into(%{}), [servers: new_servers]}
+    end
+  end
+
+  @impl true
+  def handle_call({:find, url}, _from, [servers: servers] = state) do
+    servers
+    |> Enum.map(&:sys.get_state(&1))
+    |> Enum.filter(fn [spec: %{"servers" => hosts}, id: _id] ->
+      hosts |> Enum.any?(fn spec_host -> spec_host["url"] == url end) |> IO.inspect()
+    end)
+    |> case do
+      [_server | _hosts] ->
+        {:reply, {:ok, url}, state}
+
+      [] ->
+        {:reply, {:error, nil}, state}
     end
   end
 
