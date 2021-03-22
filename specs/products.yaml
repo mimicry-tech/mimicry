@@ -14,4 +14,46 @@ servers:
     description: Production system, get your Swag here!
   - url: https://floriank-products.staging.info
     description: Staging system without billing integration
-paths: []
+paths:
+  '/product/{productId}':
+    get:
+      summary: GET product
+      tags:
+        - product
+        - collection
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: /#components/schemas/Product
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: /#components/schemas/NotFoundError
+      operationId: get-products
+      description: Returns all products as a collection
+    parameters: []
+components:
+  schemas:
+    Product:
+      title: A product
+      description: Represents a single, really cool product
+      type: object
+      x-examples:
+        productId: foobar
+        name: A foobar product!
+        dimensions:
+          height: 23
+          width: 8
+          depth: 12
+    NotFoundError:
+      title: An error when something cannot be found
+      description: Represents a NotFound error
+      type: object
+      x-examples:
+        message: Not found!
+        error_code: 131
