@@ -104,13 +104,15 @@ defmodule Mimicry.MockServerSupervisor do
   @impl true
   def handle_call({:find, url}, _from, [servers: servers] = state) do
     servers
-    |> Enum.map(&:sys.get_state(&1))
-    |> Enum.filter(fn [spec: %{"servers" => hosts}, id: _id] ->
-      hosts |> Enum.any?(fn spec_host -> spec_host["url"] == url end) |> IO.inspect()
+    |> Enum.map(fn server ->
+      {server, :sys.get_state(server)}
+    end)
+    |> Enum.filter(fn {_, [spec: %{"servers" => hosts}, id: _id]} ->
+      hosts |> Enum.any?(fn spec_host -> spec_host["url"] == url end)
     end)
     |> case do
-      [_server | _hosts] ->
-        {:reply, {:ok, url}, state}
+      [{server, _spec} | _hosts] ->
+        {:reply, {:ok, server}, state}
 
       [] ->
         {:reply, {:error, nil}, state}
