@@ -21,10 +21,17 @@ usage:
 	@echo "  * status           - see the current status of the development server"
 	@echo "  * test             - Run tests"
 	@echo "  * test-watch       - Observe files and run tests on changes"
+	@echo "  * reset       			- Reset the development server"
+	@echo "  * reset-hard       - Rebuild all the things, restart"
+
 
 .PHONY: test
 
 setup: dev-config build hex-deps
+
+reset: stop up
+
+reset-hard: down setup up
 
 dev-config:
 	rsync --ignore-existing config/dev.exs.sample config/dev.exs
