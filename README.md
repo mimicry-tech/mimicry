@@ -1,10 +1,33 @@
 # Mimicry
 
-A small server for generating ad hoc mock servers based on a specification.
+A small server for generating ad hoc mock servers based on an OpenAPIv3 specification.
 
 For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
 :warning: This is an idea at the moment, which I invest some free time into. Come back later, if you like :wink:
+
+## Usage
+
+If you'd like to try out how it works, add an OpenAPIv3 Specification to the [`specs`](./specs) folder 9the spec will be read upon startup or do a
+
+```
+$ curl --header "Content-Type: application/json" \ 
+       --request POST \
+       --data '{"spec": { /* your OpenAPIv3 Spec */ }}'' \
+       http://localhost:4000/__mimicry
+```
+
+to get and ad hoc server.
+
+Following up with a 
+
+```
+# The host you're using needs to be part of your OpenAPIv3 Specification in info.servers[]
+$ curl --header "X-Mimicry-Host: https://my.production.api.info" \
+       http://localhost:4000/
+```
+
+should return you the specification.
 
 ## Development
 
