@@ -50,6 +50,7 @@ defmodule Mimicry.MockServerList do
   Looks up a mock server based on the host passed.host
   A given host will match as long as one of its hosts matches _exactly_
   """
+  @spec find_server(String.t()) :: {:ok, pid()} | {:error, :not_found}
   def find_server(url) do
     children()
     |> Enum.map(fn pid ->
@@ -59,7 +60,7 @@ defmodule Mimicry.MockServerList do
       hosts |> Enum.any?(fn spec_host -> spec_host["url"] == url end)
     end)
     |> case do
-      [{_server, spec} | _hosts] -> {:ok, spec}
+      [{server, _spec} | _hosts] -> {:ok, server}
       [] -> {:error, :not_found}
     end
   end
