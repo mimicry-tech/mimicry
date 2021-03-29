@@ -4,8 +4,17 @@ defmodule Mimicry.MockServer do
   """
   use GenServer
 
+  alias Mimicry.MockApi
+
+  @doc """
+  gets the internal state of a mock server
+  """
   def get_details(pid) do
     pid |> GenServer.call(:details)
+  end
+
+  def request(pid, conn = %Plug.Conn{}, _params = %{}) do
+    pid |> GenServer.call({:request, conn})
   end
 
   def child_spec(id, openapi_spec) do
@@ -41,5 +50,10 @@ defmodule Mimicry.MockServer do
   def handle_call(:details, _from, state) do
     details = state |> Keyword.take([:spec, :id]) |> Enum.into(%{})
     {:reply, details, state}
+  end
+
+  @impl true
+  def handle_call({:request, conn = %Plug.Conn{}}, _from, state) do
+    {:reply, conn |> MockApi.respond(state[:spec]), state}
   end
 end
