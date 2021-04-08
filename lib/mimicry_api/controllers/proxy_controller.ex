@@ -25,7 +25,9 @@ defmodule MimicryApi.ProxyController do
     end
   end
 
-  defp destructure_response(%{body: body, headers: _headers, status: status}, conn = %Plug.Conn{}) do
-    conn |> put_status(status) |> json(body)
+  defp destructure_response(%{body: body, headers: headers, status: status}, conn = %Plug.Conn{}) do
+    require Logger
+    Logger.info(headers)
+    conn |> merge_resp_headers(headers) |> put_status(status) |> json(body)
   end
 end
