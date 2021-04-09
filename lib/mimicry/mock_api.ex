@@ -10,7 +10,7 @@ defmodule Mimicry.MockApi do
   @doc """
   main entry point for responses.
 
-  Essentially tries to infer the path used and respond with an example
+  Essentially tries to infer the path used and respond with an example from the spec
   """
   @spec respond(Plug.Conn.t(), map()) :: map()
   def respond(_conn = %Plug.Conn{method: method, request_path: request_path}, spec) do
@@ -37,7 +37,7 @@ defmodule Mimicry.MockApi do
     {usable, non_usable} = paths |> Map.keys() |> make_regex()
 
     if length(non_usable) > 0 do
-      Logger.info("Could not create regexp for the following paths", paths: non_usable)
+      Logger.warn("Could not create regexp for the following paths", paths: non_usable)
     end
 
     usable
@@ -66,6 +66,8 @@ defmodule Mimicry.MockApi do
   end
 
   defp respond_with_spec(%{"paths" => paths}, method, path) do
+    Logger.info(paths)
+
     %{
       status: :im_a_teapot,
       body: %{existing: true, path_called: paths[path], method: method},

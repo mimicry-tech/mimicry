@@ -22,7 +22,7 @@ defmodule Mimicry.MockServerList do
   @doc """
   creates a new MockServer started under the `DynamicSupervisor`
 
-  Idempotent, this will not create a duplicate for the combination of `title` + `version`.
+  Idempotent, this will not create a duplicate for the same combination of `title` + `version`.
   """
   def create_server(spec) do
     case start_mock_server(spec) do
@@ -91,11 +91,11 @@ defmodule Mimicry.MockServerList do
 
   defp children() do
     DynamicSupervisor.which_children(__MODULE__)
-    # NOTE: DynamicSupervisor children are all `undefined` for their ids
+    # NOTE: DynamicSupervisor children are all `:undefined` in respect for their ids
     |> Enum.map(fn {:undefined, pid, _, _} -> pid end)
   end
 
   defp state(pid) do
-    pid |> :sys.get_state() |> Keyword.take([:spec, :id]) |> Enum.into(%{})
+    pid |> :sys.get_state() |> Keyword.take([:id, :entities]) |> Enum.into(%{})
   end
 end

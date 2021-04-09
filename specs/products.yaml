@@ -44,16 +44,16 @@ components:
       description: Represents a single, really cool product
       type: object
       x-examples:
-        productId: foobar
-        name: A foobar product!
-        dimensions:
-          height: 23
-          width: 8
-          depth: 12
+        - productId: foobar
+          name: A foobar product!
+          dimensions:
+            height: 23
+            width: 8
+            depth: 12
     NotFoundError:
       title: An error when something cannot be found
       description: Represents a NotFound error
       type: object
       x-examples:
-        message: Not found!
-        error_code: 131
+        - message: Not found!
+          error_code: 131

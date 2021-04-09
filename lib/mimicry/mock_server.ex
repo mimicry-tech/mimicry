@@ -3,6 +3,7 @@ defmodule Mimicry.MockServer do
   `MockServer` realizes a single API server pretending to be some API based on a given OpenAPIv3 specification.
   """
   use GenServer
+  require Logger
 
   alias Mimicry.MockApi
 
@@ -36,10 +37,22 @@ defmodule Mimicry.MockServer do
     |> String.to_atom()
   end
 
+  defp entities_from_examples(%{"components" => %{"schemas" => entities}}) do
+    entities
+    |> Enum.map(fn {entity_name, %{"x-examples" => examples}} ->
+      %{"/#components/schemas/#{entity_name}" => examples}
+    end)
+  end
+
+  defp entities_from_examples(_), do: %{}
+
   ## Callbacks
 
   @impl true
-  def init(state), do: {:ok, state}
+  def init(state) do
+    entities = entities_from_examples(state |> Keyword.get(:spec, %{}))
+    {:ok, [{:entities, entities} | state]}
+  end
 
   @impl true
   def handle_call({:route, _method}, _from, state) do
