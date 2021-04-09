@@ -12,8 +12,13 @@ defmodule Mimicry.MockApi do
 
   Essentially tries to infer the path used and respond with an example from the spec
   """
-  @spec respond(Plug.Conn.t(), map()) :: map()
-  def respond(_conn = %Plug.Conn{method: method, request_path: request_path}, spec) do
+  @spec respond(Plug.Conn.t(), keyword()) :: map()
+  def respond(
+        _conn = %Plug.Conn{method: method, request_path: request_path},
+        # [entities: entities, spec: spec] = _state
+        state
+      ) do
+    %{spec: spec, entities: entities} = state |> Enum.into(%{})
     paths = spec |> paths_from_spec()
 
     path =
@@ -27,9 +32,13 @@ defmodule Mimicry.MockApi do
       end
 
     if path == :not_found do
-      %{status: 404, headers: [@mimicry_not_found], body: %{}}
+      %{
+        status: 404,
+        headers: [@mimicry_not_found],
+        body: %{}
+      }
     else
-      spec |> respond_with_spec(method, path)
+      spec |> respond_with_spec(method, path, entities)
     end
   end
 
@@ -65,13 +74,32 @@ defmodule Mimicry.MockApi do
     |> Regex.compile()
   end
 
-  defp respond_with_spec(%{"paths" => paths}, method, path) do
-    Logger.info(paths)
+  defp respond_with_spec(%{"paths" => paths}, method, path, entities) do
+    entities |> Logger.info()
 
-    %{
-      status: :im_a_teapot,
-      body: %{existing: true, path_called: paths[path], method: method},
-      headers: [{"x-mimicry-found", path}, {"x-mimicry-method", method}]
-    }
+    paths[path]
+    |> Map.get(method |> String.downcase())
+    |> case do
+      nil ->
+        %{
+          status: :method_not_allowed,
+          body: %{},
+          headers: [
+            {"x-mimicry-path", path},
+            {"x-mimicry-method", method},
+            {"x-mimicry-unsupported-method", "1"}
+          ]
+        }
+
+      %{"responses" => %{"200" => %{"content" => %{"application/json" => %{"schema" => schema}}}}} ->
+        ref = schema |> Map.get("$ref", nil)
+
+        %{
+          status: :ok,
+          # TODO: find an appropriate field and match the id instead of taking a random example
+          body: entities |> Map.get(ref),
+          headers: [{"x-mimicry-found", path}, {"x-mimicry-method", method}]
+        }
+    end
   end
 end

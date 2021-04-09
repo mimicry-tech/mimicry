@@ -39,8 +39,8 @@ defmodule Mimicry.MockServer do
 
   defp entities_from_examples(%{"components" => %{"schemas" => entities}}) do
     entities
-    |> Enum.map(fn {entity_name, %{"x-examples" => examples}} ->
-      %{"/#components/schemas/#{entity_name}" => examples}
+    |> Enum.into(%{}, fn {entity_name, %{"x-examples" => examples}} ->
+      {"/#components/schemas/#{entity_name}", examples}
     end)
   end
 
@@ -61,12 +61,12 @@ defmodule Mimicry.MockServer do
 
   @impl true
   def handle_call(:details, _from, state) do
-    details = state |> Keyword.take([:spec, :id]) |> Enum.into(%{})
+    details = state |> Keyword.take([:spec, :entities, :id]) |> Enum.into(%{})
     {:reply, details, state}
   end
 
   @impl true
   def handle_call({:request, conn = %Plug.Conn{}}, _from, state) do
-    {:reply, conn |> MockApi.respond(state[:spec]), state}
+    {:reply, conn |> MockApi.respond(state), state}
   end
 end
