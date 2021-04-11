@@ -5,7 +5,6 @@ defmodule Mimicry.MockApi do
   require Logger
 
   @allowed_param_characters "[a-zA-Z0-9\_\-]*"
-  @mimicry_not_found {"x-mimicry-path-not-found-in-specification", "1"}
 
   @doc """
   main entry point for responses.
@@ -15,30 +14,31 @@ defmodule Mimicry.MockApi do
   @spec respond(Plug.Conn.t(), keyword()) :: map()
   def respond(
         _conn = %Plug.Conn{method: method, request_path: request_path},
-        # [entities: entities, spec: spec] = _state
         state
       ) do
     %{spec: spec, entities: entities} = state |> Enum.into(%{})
     paths = spec |> paths_from_spec()
 
-    path =
+    path_from_specification =
       paths
       |> Enum.filter(fn {_path, regex_path} ->
         regex_path |> Regex.match?(request_path)
       end)
       |> case do
         [] -> :not_found
-        [{path, _}] -> path
+        [{found, _}] -> found
       end
 
-    if path == :not_found do
+    if path_from_specification == :not_found do
       %{
-        status: 404,
-        headers: [@mimicry_not_found],
+        status: :not_found,
+        headers:
+          [{"x-mimicry-path-not-in-specification", "1"}]
+          |> default_headers(request_path, method),
         body: %{}
       }
     else
-      spec |> respond_with_spec(method, path, entities)
+      spec |> respond_with_spec(method, path_from_specification, entities)
     end
   end
 
@@ -75,8 +75,6 @@ defmodule Mimicry.MockApi do
   end
 
   defp respond_with_spec(%{"paths" => paths}, method, path, entities) do
-    entities |> Logger.info()
-
     paths[path]
     |> Map.get(method |> String.downcase())
     |> case do
@@ -84,11 +82,11 @@ defmodule Mimicry.MockApi do
         %{
           status: :method_not_allowed,
           body: %{},
-          headers: [
-            {"x-mimicry-path", path},
-            {"x-mimicry-method", method},
-            {"x-mimicry-unsupported-method", "1"}
-          ]
+          headers:
+            [
+              {"x-mimicry-unsupported-method", "1"}
+            ]
+            |> default_headers(path, method)
         }
 
       %{"responses" => %{"200" => %{"content" => %{"application/json" => %{"schema" => schema}}}}} ->
@@ -98,8 +96,16 @@ defmodule Mimicry.MockApi do
           status: :ok,
           # TODO: find an appropriate field and match the id instead of taking a random example
           body: entities |> Map.get(ref),
-          headers: [{"x-mimicry-found", path}, {"x-mimicry-method", method}]
+          headers: default_headers(path, method)
         }
     end
+  end
+
+  defp default_headers(headers \\ [], path, method) do
+    [
+      {"x-mimicry-path", path},
+      {"x-mimicry-method", method}
+    ]
+    |> Enum.concat(headers)
   end
 end

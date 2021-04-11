@@ -26,8 +26,16 @@ defmodule MimicryApi.ProxyController do
   end
 
   defp destructure_response(%{body: body, headers: headers, status: status}, conn = %Plug.Conn{}) do
-    require Logger
-    Logger.info(headers)
-    conn |> merge_resp_headers(headers) |> put_status(status) |> json(body)
+    conn
+    |> clean_default_headers()
+    |> merge_resp_headers(headers)
+    |> put_status(status)
+    |> json(body)
+  end
+
+  defp clean_default_headers(conn = %Plug.Conn{}) do
+    conn
+    |> delete_resp_header("content-type")
+    |> delete_resp_header("cache-control")
   end
 end
