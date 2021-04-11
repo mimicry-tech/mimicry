@@ -5,7 +5,7 @@ defmodule Mimicry.MockServer do
   use GenServer
   require Logger
 
-  alias Mimicry.MockApi
+  alias Mimicry.{MockApi, MockRepo}
 
   @doc """
   gets the internal state of a mock server
@@ -37,20 +37,11 @@ defmodule Mimicry.MockServer do
     |> String.to_atom()
   end
 
-  defp entities_from_examples(%{"components" => %{"schemas" => entities}}) do
-    entities
-    |> Enum.into(%{}, fn {entity_name, %{"x-examples" => examples}} ->
-      {"/#components/schemas/#{entity_name}", examples}
-    end)
-  end
-
-  defp entities_from_examples(_), do: %{}
-
   ## Callbacks
 
   @impl true
   def init(state) do
-    entities = entities_from_examples(state |> Keyword.get(:spec, %{}))
+    entities = MockRepo.build_examples(state |> Keyword.get(:spec, %{}))
     {:ok, [{:entities, entities} | state]}
   end
 

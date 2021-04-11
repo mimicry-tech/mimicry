@@ -37,5 +37,6 @@ defmodule MimicryApi.ProxyController do
     conn
     |> delete_resp_header("content-type")
     |> delete_resp_header("cache-control")
+    |> put_resp_header("server", "Mimicry")
   end
 end

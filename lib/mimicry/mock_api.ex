@@ -4,6 +4,8 @@ defmodule Mimicry.MockApi do
   """
   require Logger
 
+  alias Mimicry.MockRepo
+
   @allowed_param_characters "[a-zA-Z0-9\_\-]*"
 
   @doc """
@@ -90,12 +92,31 @@ defmodule Mimicry.MockApi do
         }
 
       %{"responses" => %{"200" => %{"content" => %{"application/json" => %{"schema" => schema}}}}} ->
-        ref = schema |> Map.get("$ref", nil)
+        schema |> Map.get("$ref", nil) |> respond_with_schema(path, method, entities)
+    end
+  end
 
+  defp respond_with_schema(nil, path, method, _entities) do
+    %{
+      status: :ok,
+      body: %{message: "reference in schema not found"},
+      headers: default_headers(path, method)
+    }
+  end
+
+  defp respond_with_schema(reference, path, method, entities) do
+    case entities[reference] |> MockRepo.get(:random) do
+      {:ok, entity} ->
         %{
           status: :ok,
-          # TODO: find an appropriate field and match the id instead of taking a random example
-          body: entities |> Map.get(ref),
+          body: entity,
+          headers: default_headers(path, method)
+        }
+
+      {:error, _error} ->
+        %{
+          status: :bad_request,
+          body: %{message: "entity examples insufficient"},
           headers: default_headers(path, method)
         }
     end
