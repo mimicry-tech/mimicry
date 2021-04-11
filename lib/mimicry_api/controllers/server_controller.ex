@@ -10,7 +10,7 @@ defmodule MimicryApi.ServerController do
   def create(conn, %{"spec" => spec}) do
     {:ok, pid} = MockServerList.create_server(spec)
 
-    %{spec: spec, id: id} = pid |> MockServer.get_details()
+    {:ok, %{spec: spec, id: id}} = pid |> MockServer.get_details()
 
     conn
     |> put_resp_header("x-mimicry-server-id", id |> to_string())
@@ -21,6 +21,23 @@ defmodule MimicryApi.ServerController do
     conn
     |> put_status(:bad_request)
     |> json(%{message: "Can't do nothing with this, did you pass a spec?"})
+  end
+
+  def spec(conn = %Plug.Conn{req_headers: headers}, _params) do
+    case headers |> Enum.find(nil, fn {header, _} -> header == "x-mimicry-host" end) do
+      {_, host} ->
+        case MockServerList.find_server(host) do
+          {:ok, server} ->
+            {:ok, %{spec: spec}} = MockServer.get_details(server)
+            conn |> json(spec)
+
+          _ ->
+            conn |> put_status(:not_found)
+        end
+
+      nil ->
+        conn |> json(%{message: "Missing header: \"X-Mimicry-Host\""}) |> put_status(:bad_request)
+    end
   end
 
   def delete(conn, %{"id" => id}) do

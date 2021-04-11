@@ -62,7 +62,7 @@ defmodule Mimicry.MockServer do
   @impl true
   def handle_call(:details, _from, state) do
     details = state |> Keyword.take([:spec, :entities, :id]) |> Enum.into(%{})
-    {:reply, details, state}
+    {:reply, {:ok, details}, state}
   end
 
   @impl true
