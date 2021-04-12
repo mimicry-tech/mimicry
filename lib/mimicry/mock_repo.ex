@@ -13,7 +13,7 @@ defmodule Mimicry.MockRepo do
   def build_examples(%{"components" => %{"schemas" => entities}} = _openapi_spec) do
     entities
     |> Enum.into(%{}, fn {entity_name, %{"x-examples" => examples}} ->
-      {"/#components/schemas/#{entity_name}", examples}
+      {"#/components/schemas/#{entity_name}", examples}
     end)
   end
 
@@ -24,13 +24,17 @@ defmodule Mimicry.MockRepo do
   """
   @spec get(list(), keyword() | :random) ::
           {:ok, any()} | {:error, :not_found} | {:error, :bad_param}
-  def get(entities, param \\ :random) do
+  def get(entities, param \\ :random)
+  def get([], _param), do: {:error, :not_found}
+
+  def get(entities, param) do
     case param do
       :random ->
         entity = entities |> Enum.shuffle() |> hd()
         {:ok, entity}
 
       {name, given_value} ->
+        # FIXME: all params passed are strings, the data in the example not necessarily is.
         case(entities |> Enum.find(fn {key, val} -> key == name && val == given_value end)) do
           nil -> {:error, :not_found}
           entity -> {:ok, entity}

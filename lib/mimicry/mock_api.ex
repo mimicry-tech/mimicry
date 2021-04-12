@@ -6,7 +6,7 @@ defmodule Mimicry.MockApi do
 
   alias Mimicry.MockRepo
 
-  @allowed_param_characters "[a-zA-Z0-9\_\-]*"
+  @allowed_param_characters "\\S"
 
   @doc """
   main entry point for responses.
@@ -27,8 +27,8 @@ defmodule Mimicry.MockApi do
         regex_path |> Regex.match?(request_path)
       end)
       |> case do
+        [{found, _} | _] -> found
         [] -> :not_found
-        [{found, _}] -> found
       end
 
     if path_from_specification == :not_found do
@@ -68,17 +68,29 @@ defmodule Mimicry.MockApi do
     # turns the "{x}" params into named parameters within the final regexp
     # e.g.
     # /products/{productId} -> /products/<productId>[A-Za-z0-9\-\_]*
-    ~r/{[A-Za-z0-9\_\-]*}/
-    |> Regex.replace(path, fn x ->
-      path = ~r/(\{|\})/ |> Regex.replace(x, "")
-      "(?<#{path}>#{@allowed_param_characters})"
-    end)
-    |> Regex.compile()
+    r_path =
+      ~r/{[A-Za-z0-9\_\-]*}/
+      |> Regex.replace(path, fn x ->
+        path = ~r/(\{|\})/ |> Regex.replace(x, "")
+        "(?<#{path}>#{@allowed_param_characters})"
+      end)
+
+    "#{r_path}$" |> Regex.compile()
   end
 
   defp respond_with_spec(%{"paths" => paths}, method, path, entities) do
     paths[path]
-    |> Map.get(method |> String.downcase())
+    # TODO: there is more content types and responses
+    |> get_in([
+      method |> String.downcase(),
+      "responses",
+      # TODO: X-Mimicry-Expected-Response-Code
+      "default",
+      "content",
+      # TODO: react to Accept header / or the first you find in case accept is */*
+      "application/json",
+      "schema"
+    ])
     |> case do
       nil ->
         %{
@@ -91,25 +103,47 @@ defmodule Mimicry.MockApi do
             |> default_headers(path, method)
         }
 
-      %{"responses" => %{"200" => %{"content" => %{"application/json" => %{"schema" => schema}}}}} ->
-        schema |> Map.get("$ref", nil) |> respond_with_schema(path, method, entities)
+      %{"$ref" => reference} ->
+        reference |> respond_with_single(path, method, entities)
+
+      %{"allOf" => [%{"$ref" => reference} | _]} ->
+        reference |> respond_with_multiple(path, method, entities)
+
+      match ->
+        Logger.warn("Non-implemented function!", code: match)
+
+        %{
+          status: :not_implemented,
+          body: %{message: "Not yet implemented"},
+          headers: [{"x-mimicry-not-implemented", "1"}] |> default_headers(path, method)
+        }
     end
   end
 
-  defp respond_with_schema(nil, path, method, _entities) do
-    %{
-      status: :ok,
-      body: %{message: "reference in schema not found"},
-      headers: default_headers(path, method)
-    }
-  end
-
-  defp respond_with_schema(reference, path, method, entities) do
-    case entities[reference] |> MockRepo.get(:random) do
+  defp respond_with_single(reference, path, method, entities) do
+    case entities |> Map.get(reference, []) |> MockRepo.get(:random) do
       {:ok, entity} ->
         %{
           status: :ok,
           body: entity,
+          headers: default_headers(path, method)
+        }
+
+      {:error, _error} ->
+        %{
+          status: :bad_request,
+          body: %{message: "entity examples insufficient"},
+          headers: default_headers(path, method)
+        }
+    end
+  end
+
+  defp respond_with_multiple(reference, path, method, entities) do
+    case entities |> Map.get(reference, []) |> MockRepo.get(:random) do
+      {:ok, entity} ->
+        %{
+          status: :ok,
+          body: [entity],
           headers: default_headers(path, method)
         }
 

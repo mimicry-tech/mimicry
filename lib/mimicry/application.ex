@@ -9,6 +9,7 @@ defmodule Mimicry.Application do
       MimicryApi.Endpoint,
       # Start a dynamic supervisor for creating additional servers
       MockServerList,
+      # starts one task to trigger the initial seeds given in ./specs
       {Task, &MockServerList.seed_initial_servers/0}
     ]
 
