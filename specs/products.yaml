@@ -5,7 +5,7 @@ info:
   contact:
     name: Florian Kraft
     url: http://floriank.engineer
-    email: <schnuffifk+mimicry@gmail.com>
+    email: schnuffifk+mimicry@gmail.com
   license:
     name: MIT
   description: 'A simple products API'
@@ -15,26 +15,39 @@ servers:
   - url: https://floriank-products.staging.info
     description: Staging system without billing integration
 paths:
-  '/product/{productId}':
+  '/products':
     get:
-      summary: GET product
+      summary: GET all products
       tags:
         - product
         - collection
       responses:
-        '200':
+        default:
           description: OK
           content:
             application/json:
               schema:
-                $ref: /#components/schemas/Product
+                allOf:
+                - $ref: '#/components/schemas/Product'
+  '/products/{productId}':
+    get:
+      summary: GET product
+      tags:
+        - product
+      responses:
+        default:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
         '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: /#components/schemas/NotFoundError
-      operationId: get-products
+                $ref: '#/components/schemas/NotFoundError'
+      operationId: get-product
       description: Returns all products as a collection
     parameters: []
 components:
