@@ -15,7 +15,7 @@ defmodule Mimicry.MockApi do
   """
   @spec respond(Plug.Conn.t(), keyword()) :: map()
   def respond(
-        _conn = %Plug.Conn{method: method, request_path: request_path},
+        _conn = %Plug.Conn{method: method, request_path: request_path, req_headers: req_headers},
         state
       ) do
     %{spec: spec, entities: entities} = state |> Enum.into(%{})
@@ -40,7 +40,18 @@ defmodule Mimicry.MockApi do
         body: %{}
       }
     else
-      spec |> respond_with_spec(method, path_from_specification, entities)
+      code =
+        req_headers
+        |> Enum.find(fn {header, _} -> header == "x-mimicry-expected-response" end)
+        |> case do
+          nil -> "default"
+          {"x-mimicry-expected-response", code} -> code
+        end
+
+      spec
+      |> respond_with_spec(method, path_from_specification, entities, %{
+        response: code
+      })
     end
   end
 
@@ -78,14 +89,20 @@ defmodule Mimicry.MockApi do
     "#{r_path}$" |> Regex.compile()
   end
 
-  defp respond_with_spec(%{"paths" => paths}, method, path, entities) do
+  defp respond_with_spec(
+         %{"paths" => paths},
+         method,
+         path,
+         entities,
+         %{response: response} = _expectations
+       ) do
     paths[path]
     # TODO: there is more content types and responses
     |> get_in([
       method |> String.downcase(),
       "responses",
       # TODO: X-Mimicry-Expected-Response-Code
-      "default",
+      response,
       "content",
       # TODO: react to Accept header / or the first you find in case accept is */*
       "application/json",
