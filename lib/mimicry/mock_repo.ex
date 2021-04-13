@@ -35,7 +35,7 @@ defmodule Mimicry.MockRepo do
 
       {name, given_value} ->
         # FIXME: all params passed are strings, the data in the example not necessarily is.
-        case(entities |> Enum.find(fn {key, val} -> key == name && val == given_value end)) do
+        case entities |> Enum.find(fn {key, val} -> key == name && val == given_value end) do
           nil -> {:error, :not_found}
           entity -> {:ok, entity}
         end

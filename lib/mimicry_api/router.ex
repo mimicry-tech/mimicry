@@ -15,6 +15,12 @@ defmodule MimicryApi.Router do
       get("/*path", ServerController, :show)
     end
 
-    match(:*, "/*path", ProxyController, :show)
+    get("/*path", ProxyController, :show)
+    put("/*path", ProxyController, :show)
+    post("/*path", ProxyController, :show)
+    head("/*path", ProxyController, :show)
+    trace("/*path", ProxyController, :show)
+    patch("/*path", ProxyController, :show)
+    options("/*path", ProxyController, :show)
   end
 end
