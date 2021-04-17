@@ -1,11 +1,27 @@
 openapi: 3.0.0
 info:
-  title: Test
+  title: Test YAML
   version: '1.0'
   license:
     name: MIT
   description: 'A simple API'
 servers:
-  - url: https://simple-api.com
+  - url: https://simple-api.testing.com
     description: production
-paths: []
+paths:
+  '/':
+    get:
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: string
+                required:
+                  - message
+                examples:
+                  success:
+                    message: 'A message from simple api'
+

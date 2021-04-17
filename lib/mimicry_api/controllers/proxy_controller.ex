@@ -9,12 +9,15 @@ defmodule MimicryApi.ProxyController do
     case conn |> get_req_header("x-mimicry-host") do
       # NOTE: we're taking the first occurence of the header value
       [host | _hosts] ->
-        case MockServerList.find_server(host) do
+        case host |> MockServerList.find_server() do
           {:ok, pid} ->
             conn |> respond_with_mimicry(pid, params) |> destructure_response(conn)
 
           {:error, :not_found} ->
-            conn |> put_status(:not_found) |> json(%{error: "No such API available!"})
+            conn
+            |> put_status(:not_found)
+            |> put_resp_header("x-mimicry-specification-not-found", "1")
+            |> json(%{message: "No such API available!"})
         end
 
       [] ->

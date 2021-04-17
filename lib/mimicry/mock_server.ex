@@ -37,6 +37,8 @@ defmodule Mimicry.MockServer do
     |> String.to_atom()
   end
 
+  def create_id(_), do: raise("Missing \"title\" + \"version\"")
+
   ## Callbacks
 
   @impl true

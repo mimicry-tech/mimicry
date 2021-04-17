@@ -7,6 +7,8 @@ defmodule Mimicry.MockServerList do
   """
   use DynamicSupervisor
 
+  require Logger
+
   alias Mimicry.MockServer
 
   ## Boundary
@@ -24,10 +26,12 @@ defmodule Mimicry.MockServerList do
 
   Idempotent, this will not create a duplicate for the same combination of `title` + `version`.
   """
+  @spec create_server(map()) :: {:ok, pid()} | {:error, :invalid_specification}
   def create_server(spec) do
     case start_mock_server(spec) do
       {:ok, pid} -> {:ok, pid}
       {:error, {:already_started, pid}} -> {:ok, pid}
+      {:error, _, _message} -> {:error, :invalid_specification}
     end
   end
 
@@ -37,7 +41,7 @@ defmodule Mimicry.MockServerList do
   def delete_server(id) do
     children()
     |> Enum.filter(fn pid ->
-      id == pid |> :sys.get_state() |> Keyword.get(:id) |> to_string()
+      id |> to_string() == pid |> :sys.get_state() |> Keyword.get(:id) |> to_string()
     end)
     |> Enum.map(fn pid ->
       last_state = pid |> state()
@@ -56,8 +60,8 @@ defmodule Mimicry.MockServerList do
     |> Enum.map(fn pid ->
       {pid, pid |> :sys.get_state() |> Keyword.get(:spec)}
     end)
-    |> Enum.uniq_by(fn {_, %{"servers" => hosts}} ->
-      hosts |> Enum.any?(fn spec_host -> spec_host["url"] == url end)
+    |> Enum.filter(fn {_, %{"servers" => hosts}} ->
+      hosts |> Enum.any?(fn %{"url" => host_url} -> host_url == url end)
     end)
     |> case do
       [{server, _spec} | _hosts] -> {:ok, server}
@@ -85,8 +89,14 @@ defmodule Mimicry.MockServerList do
   end
 
   defp start_mock_server(spec) do
-    child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec)
-    DynamicSupervisor.start_child(__MODULE__, child_spec)
+    try do
+      child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec)
+      DynamicSupervisor.start_child(__MODULE__, child_spec)
+    rescue
+      e in RuntimeError ->
+        Logger.error(e.message, spec: spec)
+        {:error, :invalid_spec, e.message}
+    end
   end
 
   defp children() do
@@ -96,6 +106,6 @@ defmodule Mimicry.MockServerList do
   end
 
   defp state(pid) do
-    pid |> :sys.get_state() |> Keyword.take([:id, :entities]) |> Enum.into(%{})
+    pid |> :sys.get_state() |> Keyword.take([:id, :entities, :spec]) |> Enum.into(%{})
   end
 end
