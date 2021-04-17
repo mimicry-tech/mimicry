@@ -69,6 +69,7 @@ jobs:
       with:
         otp-version: 23.1
         elixir-version: 1.11.4
+        experimental-otp: true
 
     - name: Install hex
       run: mix local.hex --force
