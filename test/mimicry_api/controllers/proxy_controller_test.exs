@@ -4,9 +4,9 @@ defmodule MimicryApi.ProxyControllerTest do
   test "GET /", %{conn: conn} do
     conn = conn |> get("/")
 
-    assert json_response(conn, 200)
+    assert json_response(conn, :ok)
 
-    assert %{"message" => message} = conn |> json_response(200)
+    assert %{"message" => message} = conn |> json_response(:ok)
     assert message =~ "X-Mimicry-Host"
     assert [Mimicry.version()] == conn |> get_resp_header("x-mimicry-version")
   end
@@ -19,7 +19,7 @@ defmodule MimicryApi.ProxyControllerTest do
     test "GET / with \"#{@fake_host}\"", %{conn: conn} do
       conn = conn |> put_req_header("x-mimicry-host", @fake_host) |> get("/")
 
-      assert %{"message" => message} = json_response(conn, 404)
+      assert %{"message" => message} = json_response(conn, :not_found)
       assert message =~ "No such API available!"
 
       assert ["1"] = conn |> get_resp_header("x-mimicry-specification-not-found")
@@ -27,7 +27,7 @@ defmodule MimicryApi.ProxyControllerTest do
 
     test "GET / with \"#{@existing_host}\"", %{conn: conn} do
       conn = conn |> put_req_header("x-mimicry-host", @existing_host) |> get("/")
-      assert %{"message" => message} = conn |> json_response(200)
+      assert %{"message" => message} = conn |> json_response(:ok)
 
       assert message =~ "Simple message!"
     end

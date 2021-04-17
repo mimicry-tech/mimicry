@@ -38,6 +38,7 @@ defmodule Mimicry.MockServerList do
   @doc """
   Deletes a server given an `id` - the `id` in question needs to be one of the generated IDs
   """
+  @spec delete_server(atom() | String.t()) :: list()
   def delete_server(id) do
     children()
     |> Enum.filter(fn pid ->

@@ -8,19 +8,23 @@ defmodule MimicryApi.ServerController do
   end
 
   def create(conn, %{"spec" => spec}) do
-    {:ok, pid} = MockServerList.create_server(spec)
+    case spec |> MockServerList.create_server() do
+      {:ok, pid} ->
+        {:ok, %{spec: spec, id: id}} = pid |> MockServer.get_details()
 
-    {:ok, %{spec: spec, id: id}} = pid |> MockServer.get_details()
+        conn
+        |> put_resp_header("x-mimicry-server-id", id |> to_string())
+        |> json(spec)
 
-    conn
-    |> put_resp_header("x-mimicry-server-id", id |> to_string())
-    |> json(spec)
+      {:error, :invalid_specification} ->
+        conn |> put_status(:bad_request) |> json(%{message: "Invalid specification!"})
+    end
   end
 
   def create(conn, _) do
     conn
     |> put_status(:bad_request)
-    |> json(%{message: "Can't do nothing with this, did you pass a spec?"})
+    |> json(%{message: "Missing 'spec' property!"})
   end
 
   def spec(conn = %Plug.Conn{req_headers: headers}, _params) do
@@ -36,7 +40,7 @@ defmodule MimicryApi.ServerController do
         end
 
       nil ->
-        conn |> json(%{message: "Missing header: \"X-Mimicry-Host\""}) |> put_status(:bad_request)
+        conn |> put_status(:bad_request) |> json(%{message: "Missing header: \"X-Mimicry-Host\""})
     end
   end
 
