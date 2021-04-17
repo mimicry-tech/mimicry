@@ -8,7 +8,7 @@ For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
 ## Usage
 
-If you'd like to try out how it works, add an OpenAPIv3 Specification to the [`specs`](./specs) folder 9the spec will be read upon startup or do a
+If you'd like to try out how it works, add an OpenAPIv3 Specification to the [`specs`](./specs) folder (the spec will be read upon startup) or do a
 
 ```
 $ curl --header "Content-Type: application/json" \ 
