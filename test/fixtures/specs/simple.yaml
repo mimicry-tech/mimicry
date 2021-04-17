@@ -16,12 +16,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message: string
-                required:
-                  - message
-                examples:
-                  success:
-                    message: 'A message from simple api'
+                $ref: '#/components/schemas/SimpleMessage'
+components:
+  schemas:
+    SimpleMessage:
+      type: object
+      properties:
+        message: string
+      x-examples:
+        - message: 'Simple message!'
 

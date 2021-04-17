@@ -13,6 +13,7 @@ defmodule MimicryApi.ProxyControllerTest do
 
   describe "when using \"x-mimicry-host\"" do
     @fake_host "https://foo.bar.com"
+    # see fixtures/specs/simple.yaml
     @existing_host "https://simple-api.testing.com"
 
     test "GET / with \"#{@fake_host}\"", %{conn: conn} do
@@ -28,7 +29,7 @@ defmodule MimicryApi.ProxyControllerTest do
       conn = conn |> put_req_header("x-mimicry-host", @existing_host) |> get("/")
       assert %{"message" => message} = conn |> json_response(200)
 
-      assert message =~ "Message from simple-api.testing.com"
+      assert message =~ "Simple message!"
     end
   end
 end
