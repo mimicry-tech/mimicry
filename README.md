@@ -1,10 +1,10 @@
 # Mimicry
 
-A small server for generating ad hoc mock servers based on an OpenAPIv3 specification.
+A small server for generating ad hoc mock servers based on an OpenAPIv3 specification. The plan is to provide a way to generate a set of mock server based on OpenAPIv3 specifications. As a bonus, it will provide a GraphQL endpoint based on the schemata provided.
 
 For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
-:warning: This is an idea at the moment, which I invest some free time into. Come back later, if you like :wink:
+:warning: This is an idea at the moment, which I invest some free time into. Come back later, if you like :wink: - A lot of stuff is in progress or just scribbled on a napkin right now.
 
 ## Usage
 
