@@ -94,7 +94,7 @@ defmodule Mimicry.MockApi do
          method,
          path,
          entities,
-         %{response: response} = _expectations
+         %{response: response}
        ) do
     paths[path]
     # TODO: there is more content types and responses

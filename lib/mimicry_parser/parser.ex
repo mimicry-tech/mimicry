@@ -1,4 +1,7 @@
 defmodule MimicryParser.Parser do
+  @moduledoc """
+  the Parser module contains functions to read specifications from YAML or JSON
+  """
   alias Mimicry.OpenAPI.Specification
 
   @doc """

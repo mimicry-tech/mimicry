@@ -10,7 +10,7 @@ defmodule Mimicry.MockRepo do
   for the entities by their name
   """
   @spec build_examples(map()) :: map()
-  def build_examples(%{"components" => %{"schemas" => entities}} = _openapi_spec) do
+  def build_examples(_openapi_spec = %{"components" => %{"schemas" => entities}}) do
     entities
     |> Enum.into(%{}, fn {entity_name, %{"x-examples" => examples}} ->
       {"#/components/schemas/#{entity_name}", examples}
@@ -34,15 +34,19 @@ defmodule Mimicry.MockRepo do
         {:ok, entity}
 
       {name, given_value} ->
-        # FIXME: all params passed are strings, the data in the example not necessarily is.
-        case entities |> Enum.find(fn {key, val} -> key == name && val == given_value end) do
-          nil -> {:error, :not_found}
-          entity -> {:ok, entity}
-        end
+        entities |> find_by_name_and_given_value(name, given_value)
 
       _ ->
         Logger.warn("param given to MockRepo.get/2 must be :random or a keyword list")
         {:error, :bad_param}
+    end
+  end
+
+  defp find_by_name_and_given_value(entities, name, given_value) do
+    # NOTE: not all data in the example are necessarily strings
+    case entities |> Enum.find(fn {key, val} -> key == name && val == given_value end) do
+      nil -> {:error, :not_found}
+      entity -> {:ok, entity}
     end
   end
 end

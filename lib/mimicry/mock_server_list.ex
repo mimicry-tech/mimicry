@@ -16,7 +16,7 @@ defmodule Mimicry.MockServerList do
   @doc """
   retrieves the list of currently available servers
   """
-  def list_servers() do
+  def list_servers do
     children()
     |> Enum.map(&state/1)
   end
@@ -73,7 +73,7 @@ defmodule Mimicry.MockServerList do
   @doc """
   used to seed initial servers given via the spec folder
   """
-  def seed_initial_servers() do
+  def seed_initial_servers do
     MimicryParser.Loader.load_from_spec_folder()
     |> Enum.each(&start_mock_server/1)
   end
@@ -90,17 +90,15 @@ defmodule Mimicry.MockServerList do
   end
 
   defp start_mock_server(spec) do
-    try do
-      child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec)
-      DynamicSupervisor.start_child(__MODULE__, child_spec)
-    rescue
-      e in RuntimeError ->
-        Logger.error(e.message, spec: spec)
-        {:error, :invalid_spec, e.message}
-    end
+    child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec)
+    DynamicSupervisor.start_child(__MODULE__, child_spec)
+  rescue
+    e in RuntimeError ->
+      Logger.error(e.message, spec: spec)
+      {:error, :invalid_spec, e.message}
   end
 
-  defp children() do
+  defp children do
     DynamicSupervisor.which_children(__MODULE__)
     # NOTE: DynamicSupervisor children are all `:undefined` in respect for their ids
     |> Enum.map(fn {:undefined, pid, _, _} -> pid end)

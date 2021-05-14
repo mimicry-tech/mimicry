@@ -26,7 +26,7 @@ defmodule Mimicry.MockServer do
     }
   end
 
-  def start_link([spec: _spec, id: id] = state) do
+  def start_link(state = [spec: _spec, id: id]) do
     GenServer.start_link(__MODULE__, state, name: id)
   end
 
@@ -37,7 +37,7 @@ defmodule Mimicry.MockServer do
     |> String.to_atom()
   end
 
-  def create_id(_), do: raise("Missing \"title\" + \"version\"")
+  def create_id(_), do: raise(~s(Missing "title" + "version"))
 
   ## Callbacks
 

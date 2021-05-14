@@ -1,4 +1,11 @@
 defmodule Mimicry.Application do
+  @moduledoc """
+  The main Mimicry Application will start a set of mock servers.
+
+  These servers will be bootstrapped from the specs folder, and initialized via a single
+  `Task` run concurrently to the `Mimicry.MockServerList` itself.
+
+  """
   use Application
   alias Mimicry.MockServerList
 

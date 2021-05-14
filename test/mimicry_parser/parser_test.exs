@@ -1,8 +1,8 @@
 defmodule MimicryParser.ParserTest do
   use ExUnit.Case, async: true
 
-  alias MimicryParser.Parser
   alias Mimicry.OpenAPI.Specification
+  alias MimicryParser.Parser
 
   describe "read/1" do
     test "reads a given file" do

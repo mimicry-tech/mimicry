@@ -1,6 +1,6 @@
 defmodule MimicryParser.Loader do
   @moduledoc """
-  loads the spec files from the spec folder, deduping them
+  Contains functions loading the spec files from the spec folder, deduping them
   """
 
   require Logger
@@ -9,7 +9,7 @@ defmodule MimicryParser.Loader do
 
   alias MimicryParser.Parser
 
-  def load_from_spec_folder() do
+  def load_from_spec_folder do
     if Parser.base_path() |> File.dir?() do
       load_specifications(Parser.base_path())
     else

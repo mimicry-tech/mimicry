@@ -1,4 +1,7 @@
 defmodule MimicryApi.ResponseHeaders do
+  @moduledoc """
+  ResponseHeaders which Mimicry will always attach to a response in order to identify as a mock server
+  """
   import Plug.Conn
 
   def init(opts), do: opts
