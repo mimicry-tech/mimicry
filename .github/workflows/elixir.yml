@@ -81,5 +81,3 @@ jobs:
       run: mix credo --strict
     - name: Report coverage
       run: mix coveralls.github
-    - name: Check documentation coverage
-      run: MIX_ENV=docs mix inch
