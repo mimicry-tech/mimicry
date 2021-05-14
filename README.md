@@ -58,3 +58,7 @@ $ mix deps.get
 $ mix phx.serve
 ```
 
+## Logo
+
+The logo was designed by the most excellent [Agatha Schnips](https://www.agathaschnips.com). It's released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). You may use, change and alter it, as long as you attribute the original author and indicate changes made.
+
