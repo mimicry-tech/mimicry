@@ -20,7 +20,7 @@ defmodule Mimicry.MixProject do
       homepage_url: "https://mimicry.tech",
       docs: [
         main: "Mimicry",
-        logo: "assets/mimicry-chest-mini-dark.png"
+        logo: "assets/mimicry-chest-mini-light.png"
       ]
     ]
   end
