@@ -21,7 +21,8 @@ defmodule Mimicry.MixProject do
       docs: [
         main: "Mimicry",
         logo: "assets/mimicry-chest-mini-light.png"
-      ]
+      ],
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
