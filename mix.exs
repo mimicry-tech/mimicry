@@ -14,8 +14,13 @@ defmodule Mimicry.MixProject do
       aliases: aliases(),
 
       # Docs
+      name: "Mimicry",
+      source_url: "https://github.com/floriank/mimicry",
+      # TODO: Someone make a website plz.
+      homepage_url: "https://mimicry.tech",
       docs: [
-        main: "Mimicry"
+        main: "Mimicry",
+        logo: "assets/mimicry-chest-mini-dark.png"
       ]
     ]
   end
