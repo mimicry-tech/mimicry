@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        otp: [23.1]
+        otp: [24.0]
         elixir: [1.11]
 
     steps:
@@ -32,11 +32,10 @@ jobs:
         key: ${{ runner.os }}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-build-
-    - uses: actions/setup-elixir@v1
+    - uses: erlef/setup-beam@v1
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
-        experimental-otp: true
 
     - name: Install hex
       run: mix local.hex --force
@@ -65,11 +64,10 @@ jobs:
         key: ${{ runner.os }}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-build-
-    - uses: actions/setup-elixir@v1
+    - uses: erlef/setup-beam@v1
       with:
-        otp-version: 23.1
+        otp-version: 24.0
         elixir-version: 1.11.4
-        experimental-otp: true
 
     - name: Install hex
       run: mix local.hex --force
@@ -81,3 +79,5 @@ jobs:
       run: mix credo --strict
     - name: Report coverage
       run: mix coveralls.github
+    - name: Check documentation coverage
+      run: MIX_ENV=docs mix inch
