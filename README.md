@@ -2,7 +2,7 @@
 
 [![Elixir CI](https://github.com/floriank/mimicry/actions/workflows/elixir.yml/badge.svg)](https://github.com/floriank/mimicry/actions/workflows/elixir.yml)
 
-A small server for generating ad hoc mock servers based on an OpenAPIv3 specification. The plan is to provide a way to generate a set of mock server based on OpenAPIv3 specifications.
+A small server for generating ad hoc mock servers based on an OpenAPIv3 specification.
 
 For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
