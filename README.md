@@ -10,7 +10,32 @@ For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
 ## Usage
 
-If you'd like to try out how it works, add an OpenAPIv3 Specification to the [`specs`](./specs) folder (the spec will be read upon startup) or do a
+### Docker
+
+To try it out quickly:
+
+```
+$ docker pull floriank/mimicry
+```
+
+and a
+
+```
+$ docker run -p 8080:8080 floriank/mimicry
+```
+
+### Inspecting running mimic servers
+
+By default, servers are available under the special `__mimicry` path:
+
+```
+$ curl --header "Content-Type: application/json" \ 
+       http://localhost:4000/__mimicry
+```
+
+### Creating a new mimic server
+
+If you'd like to try out how it works, post a _valid_ OpenAPIv3 to create a mock server:
 
 ```
 $ curl --header "Content-Type: application/json" \ 
@@ -18,8 +43,6 @@ $ curl --header "Content-Type: application/json" \
        --data '{"spec": { /* your OpenAPIv3 Spec */ }}'' \
        http://localhost:4000/__mimicry
 ```
-
-to get and ad hoc server.
 
 Following up with a 
 
@@ -30,6 +53,8 @@ $ curl --header "X-Mimicry-Host: https://my.production.api.info" \
 ```
 
 should return you the specification.
+
+
 
 ## Development
 
