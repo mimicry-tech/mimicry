@@ -1,4 +1,4 @@
-# Mimicry
+<h1 align="center"><img src="https://github.com/floriank/mimicry/raw/main/.github/assets/logo.png" alt="Livebook" width="200"></h1>
 
 [![Elixir CI](https://github.com/floriank/mimicry/actions/workflows/elixir.yml/badge.svg)](https://github.com/floriank/mimicry/actions/workflows/elixir.yml)
 
@@ -54,7 +54,15 @@ $ curl --header "X-Mimicry-Host: https://my.production.api.info" \
 
 should return you the specification.
 
+:exclamation: __NOTE__: Mimicry uses the `title` and `version` fields to generate an id for your particular spec. the URL passed to `X-Mimicry-Host` is one of the server URLs defined in your specification.
 
+### Preloading a specification
+
+You can add a set of specifications upon startup:
+
+```
+$ docker run -v `pwd`/my-specs:/specifications -p 8080:8080 floriank/mimicry
+```
 
 ## Development
 
