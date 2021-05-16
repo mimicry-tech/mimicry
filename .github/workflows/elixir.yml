@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        otp: [24]
+        otp: [23]
         elixir: ['1.11']
     steps:
     - uses: actions/checkout@v2
@@ -65,7 +65,7 @@ jobs:
           ${{ runner.os }}-build-
     - uses: erlef/setup-beam@v1.7.0
       with:
-        otp-version: 24
+        otp-version: 23
         elixir-version: 1.11
 
     - name: Install hex
