@@ -1,6 +1,8 @@
 # Mimicry
 
-A small server for generating ad hoc mock servers based on an OpenAPIv3 specification. The plan is to provide a way to generate a set of mock server based on OpenAPIv3 specifications. As a bonus, it will provide a GraphQL endpoint based on the schemata provided.
+[![Elixir CI](https://github.com/floriank/mimicry/actions/workflows/elixir.yml/badge.svg)](https://github.com/floriank/mimicry/actions/workflows/elixir.yml)
+
+A small server for generating ad hoc mock servers based on an OpenAPIv3 specification. The plan is to provide a way to generate a set of mock server based on OpenAPIv3 specifications.
 
 For architecture details, see [ARCHITECTURE](./ARCHITECTURE.md)
 
@@ -58,7 +60,14 @@ $ mix deps.get
 $ mix phx.serve
 ```
 
+Some ways to customizing your `iex` experience are included in this mode.
+
 ## Logo
 
 The logo was designed by the most excellent [Agatha Schnips](https://www.agathaschnips.com). It's released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). You may use, change and alter it, as long as you attribute the original author and indicate changes made.
 
+## List of planned capabilities
+
+- [ ] Coverage of _most_ of the OpenAPIv3 specification, offering opinionated servers
+- [ ] Allow for creating simple GraphQL endpoints based on the schemata provided
+- [ ] Simple installation/running via docker container
