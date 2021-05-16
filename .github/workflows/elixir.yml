@@ -79,4 +79,4 @@ jobs:
     - name: Report coverage
       run: mix coveralls.github
     - name: Check documentation coverage
-      run: MIX_ENV=docs mix inch
+      run: mix inch
