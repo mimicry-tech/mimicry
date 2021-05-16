@@ -3,3 +3,4 @@ inotify-tools
 bash
 gcc
 musl-dev
+git
