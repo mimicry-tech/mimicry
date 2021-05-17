@@ -30,7 +30,7 @@ By default, servers are available under the special `__mimicry` path:
 
 ```
 $ curl --header "Content-Type: application/json" \ 
-       http://localhost:4000/__mimicry
+       http://localhost:8080/__mimicry
 ```
 
 ### Creating a new mimic server
@@ -41,7 +41,7 @@ If you'd like to try out how it works, post a _valid_ OpenAPIv3 to create a mock
 $ curl --header "Content-Type: application/json" \ 
        --request POST \
        --data '{"spec": { /* your OpenAPIv3 Spec */ }}'' \
-       http://localhost:4000/__mimicry
+       http://localhost:8080/__mimicry
 ```
 
 Following up with a 
@@ -49,7 +49,7 @@ Following up with a
 ```
 # The host you're using needs to be part of your OpenAPIv3 Specification in info.servers[]
 $ curl --header "X-Mimicry-Host: https://my.production.api.info" \
-       http://localhost:4000/
+       http://localhost:8080/
 ```
 
 should return you the specification.
