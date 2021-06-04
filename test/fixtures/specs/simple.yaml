@@ -13,16 +13,25 @@ paths:
     get:
       responses:
         default:
+          description: 'The default response for this endpoint'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SimpleMessage'
+              examples:
+                simple:
+                  $ref: '#/components/examples/simple-message-example'
 components:
   schemas:
     SimpleMessage:
+      title: 'A simple message'
+      description: 'an example of a simple message'
       type: object
       properties:
-        message: string
-      x-examples:
-        - message: 'Simple message!'
-
+        message:
+          type: string
+  examples:
+    simple-message-example:
+      summary: 'a simple message'
+      value:
+        message: 'foobar'
