@@ -16,7 +16,7 @@ defmodule Mimicry.Utils.SpecificationFileReaderTest do
     end
   end
 
-  describe "load_into_specification/1" do
+  describe "load_into_spec/2" do
     test "transforms a JSON file into a specification" do
       json = """
       {
@@ -39,8 +39,7 @@ defmodule Mimicry.Utils.SpecificationFileReaderTest do
       }
       """
 
-      %Specification{contents: _, extension: :json} =
-        file |> FileReader.load_into_specification(:json)
+      %Specification{content: _} = json |> FileReader.load_into_specification(:json)
     end
 
     test "reads a YAML file" do
@@ -58,8 +57,7 @@ defmodule Mimicry.Utils.SpecificationFileReaderTest do
       paths: []
       """
 
-      %Specification{contents: _, extension: :yaml} =
-        file |> FileReader.load_into_specification(:yaml)
+      %Specification{content: _} = yaml |> FileReader.load_into_specification(:yaml)
     end
   end
 end

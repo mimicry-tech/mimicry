@@ -7,6 +7,9 @@ defmodule Mimicry.OpenAPI.Parser do
 
   require Logger
 
+  def yaml(str), do: parse(str, :yaml)
+  def json(str), do: parse(str, :json)
+
   def parse(str, atom) do
     str
     |> decoder(atom).()
@@ -14,8 +17,9 @@ defmodule Mimicry.OpenAPI.Parser do
       {:ok, decoded} ->
         decoded |> build_specification()
 
-      {:error, _} ->
-        Logger.warn("Could not decode JSON specification")
+      {:error, err} ->
+        Logger.warn("Could not decode #{atom |> to_string() |> String.upcase()} specification")
+        Logger.error(err)
         Specification.unsupported()
     end
   end
@@ -35,7 +39,7 @@ defmodule Mimicry.OpenAPI.Parser do
     case atom do
       # NOTE: This cannot read multiple specifications in a YAML file as of yet
       :yaml -> &YamlElixir.read_from_string/1
-      :json -> &Jason.decode/2
+      :json -> &Jason.decode/1
     end
   end
 end

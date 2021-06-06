@@ -2,51 +2,75 @@ defmodule Mimicry.OpenAPI.ParserTest do
   use ExUnit.Case
 
   alias Mimicry.OpenAPI.{
-    Example,
     Parser,
     Specification
   }
 
-  test "example/1" do
-    yaml = """
-    components:
-      examples:
-        my_example:
-          summary: An example example
-          value: '{"message": "example"}'
-    """
+  describe "parse/2" do
+    test "when the str is YAML" do
+      str = """
+      openapi: 3.0.0
+      components:
+        examples:
+          my_example:
+            summary: An example example
+            value: '{"message": "example"}'
+      info:
+        title: 'TestAPI'
+        version: '1.0'
+      """
 
-    specification = %Specification{
-      contents: yaml,
-      extension: :yaml
-    }
+      %Specification{
+        content: content,
+        title: "TestAPI",
+        version: "1.0",
+        openapi_version: "3.0.0"
+      } = Parser.parse(str, :yaml)
 
-    {:ok, %Example{summary: summary, value: value}} =
-      specification |> Parser.example("my_example")
+      %Specification{
+        content: ^content,
+        title: "TestAPI",
+        version: "1.0",
+        openapi_version: "3.0.0"
+      } = Parser.yaml(str)
 
-    assert summary == "An example example"
-    assert value == ~s({"message": "example"})
-  end
+      assert {:ok, content} == YamlElixir.read_from_string(str)
+    end
 
-  test "example/1 with embedded object" do
-    yaml = """
-    components:
-      examples:
-        my_example:
-          summary: An example example
-          value:
-            message: example
-    """
+    test "when the string is JSON" do
+      str = """
+      {
+        "openapi": "3.0.0",
+        "components": {
+          "examples": {
+            "my_example": {
+              "summary": "An example example",
+              "value": "{'message': 'example'}"
+            }
+          }
+        },
+        "info": {
+          "title": "TestAPI",
+          "version": "1.0"
+        }
+      }
+      """
 
-    specification = %Specification{
-      contents: yaml,
-      extension: :yaml
-    }
+      %Specification{
+        content: content,
+        title: "TestAPI",
+        version: "1.0",
+        openapi_version: "3.0.0"
+      } = Parser.parse(str, :json)
 
-    {:ok, %Example{summary: summary, value: value}} =
-      specification |> Parser.example("my_example")
+      %Specification{
+        content: ^content,
+        title: "TestAPI",
+        version: "1.0",
+        openapi_version: "3.0.0"
+      } = Parser.json(str)
 
-    assert summary == "An example example"
-    assert value == %{"message" => "example"}
+      assert {:ok, content} == Jason.decode(str)
+    end
   end
 end
