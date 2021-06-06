@@ -2,6 +2,7 @@ defmodule MimicryApi.ServerController do
   use MimicryApi, :controller
 
   alias Mimicry.{MockServer, MockServerList}
+  alias Mimicry.OpenAPI.Specification
 
   def index(conn, _params) do
     conn |> json(%{servers: MockServerList.list_servers()})

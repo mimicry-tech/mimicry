@@ -22,6 +22,12 @@ config :mimicry, MimicryApi.Endpoint,
     accepts: ~w(json)
   ]
 
+# The in container folder specifications will be read from upon start up
+config :mimicry, Mimicry.Utils.SpecificationFolder, path: "/specifications"
+
+# whether or not to load given specifications on startup
+config :mimicry, Mimicry.MockServerList, load_specification_files_on_startup: true
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

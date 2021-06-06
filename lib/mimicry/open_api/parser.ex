@@ -3,28 +3,39 @@ defmodule Mimicry.OpenAPI.Parser do
   Parses a given OpenAPI Specification and gives access to the different parts of the spec more easily
   """
 
-  alias Mimicry.OpenAPI.{Example, Specification}
+  alias Mimicry.OpenAPI.Specification
 
   require Logger
 
-  @doc """
-  extracts an examples by its name
-  """
-  def example(%Specification{contents: contents} = _spec, name) do
-    case contents |> _parse |> get_in(["components", "examples", name]) do
-      nil -> {:error, :not_found}
-      value -> {:ok, value |> Example.build()}
+  def parse(str, atom) do
+    str
+    |> decoder(atom).()
+    |> case do
+      {:ok, decoded} ->
+        decoded |> build_specification()
+
+      {:error, _} ->
+        Logger.warn("Could not decode JSON specification")
+        Specification.unsupported()
     end
   end
 
-  defp _parse(yaml_str) do
-    case yaml_str |> YamlElixir.read_from_string() do
-      {:ok, decoded} ->
-        decoded
+  defp build_specification(
+         parsed = %{"openapi" => openapi_version, "info" => %{"version" => v, "title" => title}}
+       ) do
+    %Specification{
+      version: v,
+      title: title,
+      openapi_version: openapi_version,
+      content: parsed
+    }
+  end
 
-      {:error, _} ->
-        Logger.warn("Could not decode yaml specification")
-        %{}
+  defp decoder(atom) do
+    case atom do
+      # NOTE: This cannot read multiple specifications in a YAML file as of yet
+      :yaml -> &YamlElixir.read_from_string/1
+      :json -> &Jason.decode/2
     end
   end
 end

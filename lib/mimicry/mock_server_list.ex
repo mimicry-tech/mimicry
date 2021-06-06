@@ -71,11 +71,14 @@ defmodule Mimicry.MockServerList do
   end
 
   @doc """
-  used to seed initial servers given via the spec folder
+  used to seed servers given via the spec folder upon startup
   """
-  def seed_initial_servers do
-    MimicryParser.Loader.load_from_spec_folder()
-    |> Enum.each(&start_mock_server/1)
+  def load_specifications_on_startup do
+    enabled? =
+      Application.get_env(:mimicry, __MODULE__, [])
+      |> Keyword.get(:load_specification_files_on_startup, true)
+
+    enabled? |> do_load_specification_on_startup()
   end
 
   ## /Boundary
@@ -107,4 +110,11 @@ defmodule Mimicry.MockServerList do
   defp state(pid) do
     pid |> :sys.get_state() |> Keyword.take([:id, :entities, :spec]) |> Enum.into(%{})
   end
+
+  defp do_load_specification_on_startup(true) do
+    Mimicry.Utils.SpecificationFolder.load_all()
+    |> Enum.each(&start_mock_server/1)
+  end
+
+  defp do_load_specification_on_startup(_), do: nil
 end

@@ -6,7 +6,4 @@ config :mimicry, MimicryApi.Endpoint,
   server: true
 
 # Start log-level in notice by default to reduce output
-config :logger, level: :notice
-
-# The in container folder specifications will be read from upon start up
-config :mimicry, MimicryParser.Parser, folder: "/specifications"
+config :logger, level: :warn

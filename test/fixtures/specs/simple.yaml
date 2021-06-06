@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Test YAML
+  title: 'Test YAML'
   version: '1.0'
   license:
     name: MIT

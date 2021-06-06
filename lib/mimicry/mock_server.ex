@@ -6,6 +6,7 @@ defmodule Mimicry.MockServer do
   require Logger
 
   alias Mimicry.{MockApi, MockRepo}
+  alias Mimicry.OpenAPI.Specification
 
   @doc """
   gets the internal state of a mock server
@@ -30,7 +31,7 @@ defmodule Mimicry.MockServer do
     GenServer.start_link(__MODULE__, state, name: id)
   end
 
-  def create_id(%{"info" => %{"title" => title, "version" => version}}) do
+  def create_id(%Specification{title: title, version: version}) do
     :md5
     |> :crypto.hash("#{title}-#{version}")
     |> Base.encode16(case: :lower)

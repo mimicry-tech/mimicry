@@ -1,5 +1,5 @@
 # project specific stuff
-alias MimicryParser.Parser
+alias Mimicry.Utils
 alias Mimicry.{MockServer, MockServerList}
 
 # only relevant outside docker, e.g. when running locally

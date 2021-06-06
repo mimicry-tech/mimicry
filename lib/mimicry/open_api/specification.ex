@@ -2,5 +2,18 @@ defmodule Mimicry.OpenAPI.Specification do
   @moduledoc """
   Specification represents a single specification file (either YAML or JSON)
   """
-  defstruct [:original_file, :contents, :extension]
+  @derive {Jason.Encoder, only: [:content]}
+  defstruct [:title, :content, :version, :openapi_version]
+
+  @doc """
+  returns the representation of an unsupported specification
+  """
+  def unsupported do
+    %__MODULE__{
+      version: "0.0.0",
+      title: "Unsupported API",
+      content: "",
+      openapi_version: "3.0.0"
+    }
+  end
 end

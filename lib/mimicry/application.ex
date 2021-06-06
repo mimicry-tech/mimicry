@@ -17,7 +17,7 @@ defmodule Mimicry.Application do
       # Start a dynamic supervisor for creating additional servers
       MockServerList,
       # starts one task to trigger the initial seeds given in ./specs
-      {Task, &MockServerList.seed_initial_servers/0}
+      {Task, &MockServerList.load_specifications_on_startup/0}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
