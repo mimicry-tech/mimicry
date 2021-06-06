@@ -1,6 +1,8 @@
 defmodule MimicryApi.ProxyControllerTest do
   use MimicryApi.ConnCase
+  use Mimicry.MockServerCase
 
+  @tag server: "simple.yaml"
   test "GET /", %{conn: conn} do
     conn = conn |> get("/")
 
@@ -13,9 +15,11 @@ defmodule MimicryApi.ProxyControllerTest do
 
   describe "when using \"x-mimicry-host\"" do
     @fake_host "https://foo.bar.com"
+
     # see fixtures/specs/simple.yaml
     @existing_host "https://simple-api.testing.com"
 
+    @tag server: "simple.yaml"
     test "GET / with \"#{@fake_host}\"", %{conn: conn} do
       conn = conn |> put_req_header("x-mimicry-host", @fake_host) |> get("/")
 
@@ -25,6 +29,7 @@ defmodule MimicryApi.ProxyControllerTest do
       assert ["1"] = conn |> get_resp_header("x-mimicry-specification-not-found")
     end
 
+    @tag server: "simple.yaml"
     test "GET / with \"#{@existing_host}\"", %{conn: conn} do
       conn = conn |> put_req_header("x-mimicry-host", @existing_host) |> get("/")
       assert %{"message" => message} = conn |> json_response(:ok)

@@ -18,20 +18,23 @@ defmodule Mimicry.OpenAPI.ParserTest do
       info:
         title: 'TestAPI'
         version: '1.0'
+      servers: []
       """
 
       %Specification{
         content: content,
         title: "TestAPI",
         version: "1.0",
-        openapi_version: "3.0.0"
+        openapi_version: "3.0.0",
+        servers: []
       } = Parser.parse(str, :yaml)
 
       %Specification{
         content: ^content,
         title: "TestAPI",
         version: "1.0",
-        openapi_version: "3.0.0"
+        openapi_version: "3.0.0",
+        servers: []
       } = Parser.yaml(str)
 
       assert {:ok, content} == YamlElixir.read_from_string(str)
@@ -52,7 +55,8 @@ defmodule Mimicry.OpenAPI.ParserTest do
         "info": {
           "title": "TestAPI",
           "version": "1.0"
-        }
+        },
+        "servers": []
       }
       """
 
@@ -60,14 +64,16 @@ defmodule Mimicry.OpenAPI.ParserTest do
         content: content,
         title: "TestAPI",
         version: "1.0",
-        openapi_version: "3.0.0"
+        openapi_version: "3.0.0",
+        servers: []
       } = Parser.parse(str, :json)
 
       %Specification{
         content: ^content,
         title: "TestAPI",
         version: "1.0",
-        openapi_version: "3.0.0"
+        openapi_version: "3.0.0",
+        servers: []
       } = Parser.json(str)
 
       assert {:ok, content} == Jason.decode(str)

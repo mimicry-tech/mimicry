@@ -24,16 +24,27 @@ defmodule Mimicry.OpenAPI.Parser do
     end
   end
 
-  defp build_specification(
-         parsed = %{"openapi" => openapi_version, "info" => %{"version" => v, "title" => title}}
-       ) do
+  @doc """
+  builds a new Specification from inputs given
+  """
+  @spec build_specification(map()) :: Specification.t()
+  def build_specification(
+        parsed = %{
+          "openapi" => openapi_version,
+          "info" => %{"version" => v, "title" => title},
+          "servers" => servers
+        }
+      ) do
     %Specification{
       version: v,
       title: title,
       openapi_version: openapi_version,
+      servers: servers,
       content: parsed
     }
   end
+
+  def build_specification(_), do: Specification.unsupported()
 
   defp decoder(atom) do
     case atom do

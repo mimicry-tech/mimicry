@@ -10,6 +10,7 @@ defmodule Mimicry.MockServerList do
   require Logger
 
   alias Mimicry.MockServer
+  alias Mimicry.OpenAPI.Specification
 
   ## Boundary
 
@@ -26,7 +27,7 @@ defmodule Mimicry.MockServerList do
 
   Idempotent, this will not create a duplicate for the same combination of `title` + `version`.
   """
-  @spec create_server(map()) :: {:ok, pid()} | {:error, :invalid_specification}
+  @spec create_server(Specification.t()) :: {:ok, pid()} | {:error, :invalid_specification}
   def create_server(spec) do
     case start_mock_server(spec) do
       {:ok, pid} -> {:ok, pid}
@@ -38,7 +39,19 @@ defmodule Mimicry.MockServerList do
   @doc """
   Deletes a server given an `id` - the `id` in question needs to be one of the generated IDs
   """
-  @spec delete_server(atom() | String.t()) :: list()
+  @spec delete_server(atom() | String.t() | pid()) :: list()
+  def delete_server(value)
+
+  def delete_server(pid) when is_pid(pid) do
+    children()
+    |> Enum.filter(fn child_pid -> child_pid == pid end)
+    |> Enum.map(fn pid ->
+      last_state = pid |> state()
+      :ok = DynamicSupervisor.terminate_child(__MODULE__, pid)
+      last_state
+    end)
+  end
+
   def delete_server(id) do
     children()
     |> Enum.filter(fn pid ->
@@ -61,7 +74,7 @@ defmodule Mimicry.MockServerList do
     |> Enum.map(fn pid ->
       {pid, pid |> :sys.get_state() |> Keyword.get(:spec)}
     end)
-    |> Enum.filter(fn {_, %{"servers" => hosts}} ->
+    |> Enum.filter(fn {_, %Specification{servers: hosts}} ->
       hosts |> Enum.any?(fn %{"url" => host_url} -> host_url == url end)
     end)
     |> case do

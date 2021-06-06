@@ -38,6 +38,16 @@ defmodule Mimicry.Utils.SpecificationFileReader do
   def load_into_spec({spec, extension}), do: load_into_spec(spec, extension)
   def load_into_spec(_), do: unsupported_spec()
 
+  @spec extension(String.t()) :: atom()
+  def extension(file) do
+    case file |> Path.extname() do
+      ".yaml" -> :yaml
+      ".yml" -> :yaml
+      ".json" -> :json
+      _ -> :unsupported
+    end
+  end
+
   @doc """
   Removes duplicate servers from a list
 
@@ -57,15 +67,6 @@ defmodule Mimicry.Utils.SpecificationFileReader do
   end
 
   defp duplicate_condition(_), do: 0
-
-  defp extension(file) do
-    case file |> Path.extname() do
-      ".yaml" -> :yaml
-      ".yml" -> :yaml
-      ".json" -> :json
-      _ -> :unsupported
-    end
-  end
 
   defp unsupported_spec,
     do: Specification.unsupported()
