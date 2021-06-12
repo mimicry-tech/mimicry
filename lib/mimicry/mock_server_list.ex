@@ -11,6 +11,7 @@ defmodule Mimicry.MockServerList do
 
   alias Mimicry.MockServer
   alias Mimicry.OpenAPI.Specification
+  alias Mimicry.Utils.SpecificationFolder, as: SpecFolder
 
   ## Boundary
 
@@ -66,8 +67,11 @@ defmodule Mimicry.MockServerList do
     end)
   end
 
+  @doc """
+  Removes all servers from the list
+  """
   @spec clear_servers() :: :ok
-  def clear_servers() do
+  def clear_servers do
     children()
     |> Enum.each(fn pid ->
       DynamicSupervisor.terminate_child(__MODULE__, pid)
@@ -143,7 +147,7 @@ defmodule Mimicry.MockServerList do
   end
 
   defp do_load_specification_on_startup(true) do
-    Mimicry.Utils.SpecificationFolder.load_all()
+    SpecFolder.load_all()
     |> Enum.each(&start_mock_server/1)
   end
 

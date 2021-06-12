@@ -1,4 +1,18 @@
 defmodule Mimicry.OpenAPISpecificationCase do
+  @moduledoc """
+  A CasteTemplate which allows for reading fixtures into Specifications directly.
+
+  In your test:
+
+  ```
+  describe "..." do
+    @tag specification: "<a file in fixtures>"
+    test "my test", %{specification: spec} do
+      %Mimicry.OpenAPI.Specification{} = spec
+    end
+  end
+  ```
+  """
   use ExUnit.CaseTemplate
   alias Mimicry.OpenAPI.Parser
   alias Mimicry.Utils.{SpecificationFileReader, SpecificationFolder}

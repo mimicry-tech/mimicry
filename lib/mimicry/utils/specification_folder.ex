@@ -36,16 +36,7 @@ defmodule Mimicry.Utils.SpecificationFolder do
     |> Path.wildcard()
     |> Enum.map(&Path.basename/1)
     |> Enum.map(fn path ->
-      Task.async(fn ->
-        case load_file(path) do
-          {content, ext} ->
-            Parser.parse(content, ext)
-
-          nil ->
-            Logger.warn("Found invalid specification in Specification folder: #{path}")
-            :error
-        end
-      end)
+      Task.async(fn -> load(path) end)
     end)
     |> Task.await_many()
     |> Enum.filter(fn val -> val != :error end)
@@ -62,6 +53,17 @@ defmodule Mimicry.Utils.SpecificationFolder do
 
       _ ->
         nil
+    end
+  end
+
+  defp load(path) do
+    case load_file(path) do
+      {content, ext} ->
+        Parser.parse(content, ext)
+
+      nil ->
+        Logger.warn("Found invalid specification in Specification folder: #{path}")
+        :error
     end
   end
 

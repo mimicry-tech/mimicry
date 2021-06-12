@@ -13,7 +13,7 @@ defmodule MimicryApi.ServerController do
 
     with spec <- definition |> SpecParser.build_specification(),
          {:ok, pid} <- MockServerList.create_server(spec),
-         {:ok, %{id: id} = response} = pid |> MockServer.get_details() do
+         {:ok, %{id: id} = response} <- pid |> MockServer.get_details() do
       conn
       |> put_resp_header("x-mimicry-server-id", id |> to_string())
       |> json(response)
