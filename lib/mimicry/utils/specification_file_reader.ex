@@ -1,11 +1,13 @@
 defmodule Mimicry.Utils.SpecificationFileReader do
   @moduledoc """
-  the Parser module contains functions to read specifications from YAML or JSON
+  `SpecificationFileReader` provides functions around fiels given to Mimicry.
   """
-  alias Mimicry.OpenAPI.{Parser, Specification}
+
+  alias Mimicry.OpenAPI.Specification
 
   @doc """
-  attempts to read a file from the configured spec directory
+  attempts to read a file from the configured spec directory,
+  retaining information about the extension of the file
 
   see config/*.exs options
   """
@@ -20,24 +22,6 @@ defmodule Mimicry.Utils.SpecificationFileReader do
     end
   end
 
-  @doc """
-  transforms content into a `Mimicry.OpenAPI.Specification`
-  """
-  @spec load_into_spec(String.t(), atom()) :: Specification.t()
-  def load_into_spec(spec, extension)
-
-  def load_into_spec(content, extension) when is_binary(content),
-    do: Parser.parse(content, extension)
-
-  def load_into_spec(_, _), do: unsupported_spec()
-
-  @doc """
-  shorthand for passing tuple
-  """
-  @spec load_into_spec(tuple()) :: Specification.t()
-  def load_into_spec({spec, extension}), do: load_into_spec(spec, extension)
-  def load_into_spec(_), do: unsupported_spec()
-
   @spec extension(String.t()) :: atom()
   def extension(file) do
     case file |> Path.extname() do
@@ -47,27 +31,4 @@ defmodule Mimicry.Utils.SpecificationFileReader do
       _ -> :unsupported
     end
   end
-
-  @doc """
-  Removes duplicate servers from a list
-
-  For now, the server with the same titles are considered duplicates
-  """
-  @spec deduplicate(list()) :: list()
-  def deduplicate([]), do: []
-
-  def deduplicate(servers) do
-    servers
-    |> Enum.filter(&(!is_nil(&1)))
-    |> Enum.uniq_by(&duplicate_condition/1)
-  end
-
-  defp duplicate_condition(%Specification{title: title, version: version}) do
-    "#{title}-#{version}"
-  end
-
-  defp duplicate_condition(_), do: 0
-
-  defp unsupported_spec,
-    do: Specification.unsupported()
 end

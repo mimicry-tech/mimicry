@@ -2,23 +2,27 @@ defmodule MimicryApi.ServerController do
   use MimicryApi, :controller
 
   alias Mimicry.{MockServer, MockServerList}
-  alias Mimicry.OpenAPI.Specification
+  alias Mimicry.OpenAPI.Parser, as: SpecParser
 
   def index(conn, _params) do
     conn |> json(%{servers: MockServerList.list_servers()})
   end
 
-  def create(conn, %{"spec" => spec}) do
-    case spec |> MockServerList.create_server() do
-      {:ok, pid} ->
-        {:ok, %{spec: spec, id: id}} = pid |> MockServer.get_details()
+  def create(conn, %{"spec" => definition}) do
+    definition |> SpecParser.build_specification()
 
-        conn
-        |> put_resp_header("x-mimicry-server-id", id |> to_string())
-        |> json(spec)
-
-      {:error, :invalid_specification} ->
+    with spec <- definition |> SpecParser.build_specification(),
+         {:ok, pid} <- MockServerList.create_server(spec),
+         {:ok, %{id: id} = response} = pid |> MockServer.get_details() do
+      conn
+      |> put_resp_header("x-mimicry-server-id", id |> to_string())
+      |> json(response)
+    else
+      {:error, :invalid_spec} ->
         conn |> put_status(:bad_request) |> json(%{message: "Invalid specification!"})
+
+      {:error, _} ->
+        conn |> put_status(:bad_request) |> json(%{message: "Invalid JSON"})
     end
   end
 

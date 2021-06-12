@@ -3,21 +3,14 @@ defmodule Mimicry.MockRepo do
   The MockRepo can be used for fetch entities from the example section within `components -> schemas` of the spec given
   """
 
+  alias Mimicry.OpenAPI.Specification
   require Logger
 
   @doc """
-  extracts examples for the list of schemas given with the speicifcation, creating a simple lookup table
-  for the entities by their name
+  Given a speicification, find an example for a given reference
   """
-  @spec build_examples(map()) :: map()
-  def build_examples(_openapi_spec = %{"components" => %{"schemas" => entities}}) do
-    entities
-    |> Enum.into(%{}, fn {entity_name, %{"x-examples" => examples}} ->
-      {"#/components/schemas/#{entity_name}", examples}
-    end)
+  def example(spec = %Specification{content: content}, reference) do
   end
-
-  def build_examples(_), do: %{}
 
   @doc """
   For a set of entities, retrieve one, either by a given ID or at random

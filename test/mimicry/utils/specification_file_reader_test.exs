@@ -3,61 +3,22 @@ defmodule Mimicry.Utils.SpecificationFileReaderTest do
 
   use ExUnit.Case, async: true
 
-  alias Mimicry.OpenAPI.Specification
-  alias Mimicry.Utils.SpecificationFileReader, as: FileReader
+  alias Mimicry.Utils.SpecificationFileReader, as: File
+  alias Mimicry.Utils.SpecificationFolder, as: Folder
 
   describe "read/1" do
-    test "reads a given file" do
-      {:ok, _} = FileReader.read("simple.yaml")
+    test "reads a given file, extracting the format as YAML correctly" do
+      path = Folder.base_path() |> Path.join("simple.yaml")
+      {:ok, _file_content, :yaml} = File.read(path)
+    end
+
+    test "reads a given file, extracting the extension as JSON correctly" do
+      path = Folder.base_path() |> Path.join("simple.json")
+      {:ok, _file_content, :json} = File.read(path)
     end
 
     test "errors when file does not exist" do
-      {:error, :enoent} = FileReader.read("non_existing.yaml")
-    end
-  end
-
-  describe "load_into_spec/2" do
-    test "transforms a JSON file into a specification" do
-      json = """
-      {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Test JSON",
-          "version": "1.0",
-          "license": {
-            "name": "MIT"
-          },
-          "description": "A simple API"
-        },
-        "servers": [
-          {
-            "url": "https://simple-api.com",
-            "description": "production"
-          }
-        ],
-        "paths": []
-      }
-      """
-
-      %Specification{content: _} = json |> FileReader.load_into_spec(:json)
-    end
-
-    test "reads a YAML file" do
-      yaml = """
-      openapi: 3.0.3
-      info:
-        title: simple api
-        version: 1.0
-        license:
-          name: MIT
-        description: A simple OpenAPI
-      servers:
-        - url: https://simple-api.com
-          description: production api
-      paths: []
-      """
-
-      %Specification{content: _} = yaml |> FileReader.load_into_spec(:yaml)
+      {:error, :enoent} = File.read("non_existing.yaml")
     end
   end
 end

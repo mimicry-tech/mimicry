@@ -27,17 +27,19 @@ defmodule Mimicry.MockServerList do
 
   Idempotent, this will not create a duplicate for the same combination of `title` + `version`.
   """
-  @spec create_server(Specification.t()) :: {:ok, pid()} | {:error, :invalid_specification}
+  @spec create_server(Specification.t()) ::
+          {:ok, pid()} | {:error, :invalid_specification} | {:error, :unknown}
   def create_server(spec) do
     case start_mock_server(spec) do
       {:ok, pid} -> {:ok, pid}
       {:error, {:already_started, pid}} -> {:ok, pid}
-      {:error, _, _message} -> {:error, :invalid_specification}
+      {:error, :invalid_specification} -> {:error, :invalid_specification}
+      {:error, _} -> {:error, :unknown}
     end
   end
 
   @doc """
-  Deletes a server given an `id` - the `id` in question needs to be one of the generated IDs
+  Deletes a server given an `id` - the `id` in question needs to be one of the generated IDs or a valid child pid
   """
   @spec delete_server(atom() | String.t() | pid()) :: list()
   def delete_server(value)
@@ -62,6 +64,16 @@ defmodule Mimicry.MockServerList do
       :ok = DynamicSupervisor.terminate_child(__MODULE__, pid)
       last_state
     end)
+  end
+
+  @spec clear_servers() :: :ok
+  def clear_servers() do
+    children()
+    |> Enum.each(fn pid ->
+      DynamicSupervisor.terminate_child(__MODULE__, pid)
+    end)
+
+    :ok
   end
 
   @doc """
@@ -105,14 +117,20 @@ defmodule Mimicry.MockServerList do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  defp start_mock_server(spec) do
+  defp start_mock_server(_spec = %Specification{supported: false}) do
+    {:error, :unsupported_spec}
+  end
+
+  defp start_mock_server(spec = %Specification{}) do
     child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec)
     DynamicSupervisor.start_child(__MODULE__, child_spec)
   rescue
     e in RuntimeError ->
       Logger.error(e.message, spec: spec)
-      {:error, :invalid_spec, e.message}
+      {:error, :invalid_specification}
   end
+
+  defp start_mock_server(_), do: {:error, :invalid_specification}
 
   defp children do
     DynamicSupervisor.which_children(__MODULE__)

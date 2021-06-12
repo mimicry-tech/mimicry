@@ -4,6 +4,15 @@ defmodule Mimicry.MockServerListTest do
   alias Mimicry.{MockServer, MockServerList}
   alias Mimicry.OpenAPI.Parser
 
+  @dummy_server %{
+    "openapi" => "3.0.0",
+    "servers" => [],
+    "info" => %{
+      "title" => "myApi",
+      "version" => "1.0.0alpha"
+    }
+  }
+
   describe "find_server/1" do
     @tag server: "simple.yaml"
     test "looks up a mock server by it's host" do
@@ -19,8 +28,7 @@ defmodule Mimicry.MockServerListTest do
   describe "list_servers/0" do
     @tag server: "simple.yaml"
     test "will list all the existing servers currently supervised" do
-      # NOTE: this is the example server from the fixtures/specs
-      assert [%{entities: %{}, id: _} | _] = MockServerList.list_servers()
+      assert [%{id: _} | _] = MockServerList.list_servers()
     end
   end
 
@@ -31,7 +39,7 @@ defmodule Mimicry.MockServerListTest do
 
     test "will start a new server based on the info section" do
       spec =
-        %{"info" => %{"title" => "myApi", "version" => "1.0.0alpha"}, "servers" => []}
+        @dummy_server
         |> Parser.build_specification()
 
       assert {:ok, _} = MockServerList.create_server(spec)
@@ -39,7 +47,7 @@ defmodule Mimicry.MockServerListTest do
 
     test "will not recreate the server" do
       spec =
-        %{"info" => %{"title" => "myApi", "version" => "1.0.0alpha"}, "servers" => []}
+        @dummy_server
         |> Parser.build_specification()
 
       {:ok, pid} = MockServerList.create_server(spec)
@@ -50,11 +58,10 @@ defmodule Mimicry.MockServerListTest do
   describe "delete_server/1" do
     setup do
       definition = %{
-        "info" => %{"title" => "myDeletableApi", "version" => "1.0.0alpha"},
-        "servers" => []
+        "info" => %{"title" => "myDeletableApi", "version" => "1.0.0alpha"}
       }
 
-      spec = Parser.build_specification(definition)
+      spec = definition |> Map.merge(@dummy_server) |> Parser.build_specification()
 
       {:ok, pid} = MockServerList.create_server(spec)
       {:ok, %{id: id}} = pid |> MockServer.get_details()
@@ -62,7 +69,6 @@ defmodule Mimicry.MockServerListTest do
       {:ok, %{id: id}}
     end
 
-    @tag :focus
     test "will delete a server by it's id", %{id: id} do
       [%{id: ^id}] = id |> MockServerList.delete_server()
     end

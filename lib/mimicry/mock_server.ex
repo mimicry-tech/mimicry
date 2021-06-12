@@ -5,7 +5,7 @@ defmodule Mimicry.MockServer do
   use GenServer
   require Logger
 
-  alias Mimicry.{MockApi, MockRepo}
+  alias Mimicry.MockAPI
   alias Mimicry.OpenAPI.Specification
 
   @doc """
@@ -43,10 +43,7 @@ defmodule Mimicry.MockServer do
   ## Callbacks
 
   @impl true
-  def init(state) do
-    entities = MockRepo.build_examples(state |> Keyword.get(:spec, %{}))
-    {:ok, [{:entities, entities} | state]}
-  end
+  def init(state), do: {:ok, state}
 
   @impl true
   def handle_call({:route, _method}, _from, state) do
@@ -55,12 +52,13 @@ defmodule Mimicry.MockServer do
 
   @impl true
   def handle_call(:details, _from, state) do
-    details = state |> Keyword.take([:spec, :entities, :id]) |> Enum.into(%{})
+    details = state |> Keyword.take([:spec, :id]) |> Enum.into(%{})
     {:reply, {:ok, details}, state}
   end
 
   @impl true
   def handle_call({:request, conn = %Plug.Conn{}}, _from, state) do
-    {:reply, conn |> MockApi.respond(state), state}
+    spec = state |> Keyword.get(:spec, nil)
+    {:reply, conn |> MockAPI.respond(spec), state}
   end
 end

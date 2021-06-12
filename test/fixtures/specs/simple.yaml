@@ -28,6 +28,15 @@ paths:
                 simple-combined-example:
                   $ref: '#/components/examples/simple-message-example'
                   summary: 'simple example with overriden summary'
+        404:
+          description: The response for when something is not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              examples:
+                simple-error:
+                  $ref: '#/components/examples/simple-error'
 
 components:
   schemas:
@@ -38,8 +47,20 @@ components:
       properties:
         message:
           type: string
+    SimpleError:
+      title: 'A simple Error'
+      description: 'A simple error model'
+      type: object
+      properties:
+        code:
+          type: integer
   examples:
     simple-message-example:
       summary: 'a simple message'
       value:
         message: 'foobar'
+    simple-error:
+      summary: 'a simple error'
+      value:
+        code: 42
+

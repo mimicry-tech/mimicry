@@ -8,6 +8,7 @@ defmodule Mimicry.Utils.SpecificationFolder do
   @load_file_types "/*.{yaml,yml,json}"
 
   alias Mimicry.Utils.SpecificationFileReader, as: FileReader
+  alias Mimicry.OpenAPI.{Parser, Specification}
 
   @doc """
   will attempt to load all specifications in the configured folder
@@ -35,10 +36,20 @@ defmodule Mimicry.Utils.SpecificationFolder do
     |> Path.wildcard()
     |> Enum.map(&Path.basename/1)
     |> Enum.map(fn path ->
-      Task.async(fn -> load_file(path) |> FileReader.load_into_spec() end)
+      Task.async(fn ->
+        case load_file(path) do
+          {content, ext} ->
+            Parser.parse(content, ext)
+
+          nil ->
+            Logger.warn("Found invalid specification in Specification folder: #{path}")
+            :error
+        end
+      end)
     end)
     |> Task.await_many()
-    |> FileReader.deduplicate()
+    |> Enum.filter(fn val -> val != :error end)
+    |> deduplicate()
   end
 
   defp load_file(path) do
@@ -53,4 +64,18 @@ defmodule Mimicry.Utils.SpecificationFolder do
         nil
     end
   end
+
+  defp deduplicate([]), do: []
+
+  defp deduplicate(servers) do
+    servers
+    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.uniq_by(&duplicate_condition/1)
+  end
+
+  defp duplicate_condition(%Specification{title: title, version: version}) do
+    "#{title}-#{version}"
+  end
+
+  defp duplicate_condition(_), do: 0
 end

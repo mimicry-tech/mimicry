@@ -1,6 +1,6 @@
 openapi: "3.0.3"
 info:
-  title: Products
+  title: ProductsAPI for Testing
   version: "1.0"
   contact:
     name: Florian Kraft
@@ -10,14 +10,16 @@ info:
     name: MIT
   description: 'A simple products API'
 servers:
-  - url: https://floriank-products.production.info
+  - url: https://products.production.info
     description: Production system, get your Swag here!
-  - url: https://floriank-products.staging.info
+  - url: https://products.staging.info
     description: Staging system without billing integration
 paths:
   '/products':
     get:
       summary: GET all products
+      operationId: get-products
+      description: Gets all products in the collection
       tags:
         - product
         - collection
@@ -32,6 +34,21 @@ paths:
               examples:
                 products-example:
                   $ref: '#/components/examples/my-cool-products'
+                inline-example:
+                  summary: A list of products
+                  value:
+                    - productId: barfoo
+                      name: A barfoo product!
+                      dimensions:
+                        height: 42
+                        width: 10
+                        depth: 99
+                    - productId: foobar
+                      name: A foobar product!
+                      dimensions:
+                        height: 23
+                        width: 8
+                        depth: 12
   '/products/{productId}':
     get:
       summary: GET product
@@ -39,19 +56,22 @@ paths:
         - product
       responses:
         default:
-          description: OK
+          description: Displaying a product
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-        '404':
+              examples:
+                foobar:
+                  $ref: '#/components/examples/my-cool-product'
+        404:
           description: Not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
       operationId: get-product
-      description: Returns all products as a collection
+      description: Returns a product
     parameters: []
 components:
   schemas:
@@ -61,11 +81,11 @@ components:
       type: object
       x-examples:
         - productId: foobar
-          name: A foobar product!
-          dimensions:
-            height: 23
-            width: 8
-            depth: 12
+          dimension:
+            height: 42
+            width: 12
+            depth: 90
+
     NotFoundError:
       title: An error when something cannot be found
       description: Represents a NotFound error

@@ -16,7 +16,7 @@ defmodule MimicryApi.ProxyControllerTest do
   describe "when using \"x-mimicry-host\"" do
     @fake_host "https://foo.bar.com"
 
-    # see fixtures/specs/simple.yaml
+    # see fixtures / specs / simple.yaml
     @existing_host "https://simple-api.testing.com"
 
     @tag server: "simple.yaml"
@@ -32,9 +32,32 @@ defmodule MimicryApi.ProxyControllerTest do
     @tag server: "simple.yaml"
     test "GET / with \"#{@existing_host}\"", %{conn: conn} do
       conn = conn |> put_req_header("x-mimicry-host", @existing_host) |> get("/")
-      assert %{"message" => message} = conn |> json_response(:ok)
+      assert %{"message" => _message} = conn |> json_response(:ok)
+    end
 
-      assert message =~ "Simple message!"
+    @tag server: "simple.yaml"
+    test "GET / with a specific example in mind", %{conn: conn} do
+      conn =
+        conn
+        |> put_req_header("x-mimicry-host", @existing_host)
+        |> put_req_header("x-mimicry-example", "simple-reference")
+        |> get("/")
+
+      assert %{"message" => message} = conn |> json_response(:ok)
+      assert message == "foobar"
+    end
+
+    @tag server: "simple.yaml"
+    test "GET / with an expected 404", %{conn: conn} do
+      conn =
+        conn
+        |> put_req_header("x-mimicry-host", @existing_host)
+        |> put_req_header("x-mimicry-expect-status", "404")
+        |> get("/")
+
+      %{"code" => code} = conn |> json_response(:not_found)
+
+      assert code == 42
     end
   end
 end

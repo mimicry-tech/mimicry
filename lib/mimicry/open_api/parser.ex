@@ -7,9 +7,20 @@ defmodule Mimicry.OpenAPI.Parser do
 
   require Logger
 
+  @doc """
+  shorthand for parse(str, :yaml)
+  """
   def yaml(str), do: parse(str, :yaml)
+
+  @doc """
+  shorthand for parse(str, :json)
+  """
   def json(str), do: parse(str, :json)
 
+  @doc """
+  parses a given string depending on its extension
+  """
+  @spec parse(String.t(), :yaml | :json) :: Specification.t()
   def parse(str, atom) do
     str
     |> decoder(atom).()
@@ -30,21 +41,24 @@ defmodule Mimicry.OpenAPI.Parser do
   @spec build_specification(map()) :: Specification.t()
   def build_specification(
         parsed = %{
+          "info" => info,
           "openapi" => openapi_version,
-          "info" => %{"version" => v, "title" => title},
           "servers" => servers
         }
       ) do
     %Specification{
-      version: v,
-      title: title,
+      version: info["version"],
+      title: info["title"],
       openapi_version: openapi_version,
       servers: servers,
       content: parsed
     }
   end
 
-  def build_specification(_), do: Specification.unsupported()
+  def build_specification(spec = _) do
+    Logger.warn("Specification most likely invalid", specification: spec)
+    Specification.unsupported()
+  end
 
   defp decoder(atom) do
     case atom do

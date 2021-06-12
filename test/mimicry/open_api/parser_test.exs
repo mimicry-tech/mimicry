@@ -79,4 +79,29 @@ defmodule Mimicry.OpenAPI.ParserTest do
       assert {:ok, content} == Jason.decode(str)
     end
   end
+
+  describe "build_specification/1" do
+    test "when the spec given doesn't match expectations" do
+      spec = %{"foobar" => "baz"} |> Parser.build_specification()
+
+      refute spec.supported
+    end
+
+    test "when the spec matches expectations" do
+      definition = %{
+        "openapi" => "3.0.0",
+        "info" => %{"title" => "myFreshNewApi", "version" => "1.0.0alpha"},
+        "servers" => [
+          %{"url" => "https://fresh-api.testing.com"}
+        ],
+        "paths" => [%{"/" => %{}}]
+      }
+
+      spec =
+        %Specification{openapi_version: "3.0.0", title: "myFreshNewApi"} =
+        definition |> Parser.build_specification()
+
+      assert spec.supported
+    end
+  end
 end

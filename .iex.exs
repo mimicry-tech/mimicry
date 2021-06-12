@@ -1,6 +1,5 @@
 # project specific stuff
-alias Mimicry.Utils
-alias Mimicry.{MockServer, MockServerList}
+alias Mimicry.{MockServer, MockServerList, OpenAPI, Utils}
 
 # only relevant outside docker, e.g. when running locally
 import_file_if_available("~/.iex.exs")
