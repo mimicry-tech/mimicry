@@ -35,9 +35,7 @@ defmodule Mimicry.Utils.SpecificationFolder do
     |> Path.join(@load_file_types)
     |> Path.wildcard()
     |> Enum.map(&Path.basename/1)
-    |> Enum.map(fn path ->
-      Task.async(fn -> load(path) end)
-    end)
+    |> Enum.map(&Task.async(fn -> load(&1) end))
     |> Task.await_many()
     |> Enum.filter(fn val -> val != :error end)
     |> deduplicate()
