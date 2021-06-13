@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://github.com/mimicry/mimicry/raw/main/.github/assets/logo.png" alt="Mimicry" width="200"></h1>
+<h1 align="center"><img src="https://github.com/mimicry-tech/mimicry/raw/main/.github/assets/logo.png" alt="Mimicry" width="200"></h1>
 
 [![Elixir CI](https://github.com/mimicry-tech/mimicry/actions/workflows/elixir.yml/badge.svg)](https://github.com/mimicry-tech/mimicry/actions/workflows/elixir.yml)
 
