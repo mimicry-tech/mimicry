@@ -61,5 +61,11 @@ defmodule Mimicry.OpenAPI.ExampleTest do
       response = %Response{examples: @examples}
       {:ok, %{"value" => _}} = response |> Example.choose(:random, spec)
     end
+
+    test "will return an error if no examples are defined" do
+      response = %Response{examples: %{}}
+
+      {:error, :no_examples} = response |> Example.choose(:random, %{})
+    end
   end
 end
