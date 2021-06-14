@@ -13,6 +13,27 @@ defmodule MimicryApi.ProxyControllerTest do
     assert [Mimicry.version()] == conn |> get_resp_header("x-mimicry-version")
   end
 
+  test "GET / shows available hosts to pass", %{conn: conn} do
+    conn = conn |> get("/")
+    assert %{"available_hosts" => hosts} = conn |> json_response(:ok)
+    assert hosts == []
+  end
+
+  @tag server: "simple.yaml"
+  test "GET / shows available hosts when specs are running", %{conn: conn} do
+    conn = conn |> get("/")
+
+    assert %{
+             "available_hosts" => [
+               %{"url" => url, "title" => title, "version" => version}
+             ]
+           } = conn |> json_response(:ok)
+
+    assert url == "https://simple-api.testing.com"
+    assert title == "Test YAML"
+    assert version == "1.0"
+  end
+
   describe "when using \"x-mimicry-host\"" do
     @fake_host "https://foo.bar.com"
 
