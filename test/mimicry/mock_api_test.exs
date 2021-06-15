@@ -11,7 +11,6 @@ defmodule Mimicry.MockAPITest do
     end
 
     @tag specification: "products-with-examples.yaml"
-    @tag :focus
     test "will pick a product from the examples by a matching identifier", %{
       conn: conn,
       specification: spec

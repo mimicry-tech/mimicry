@@ -37,22 +37,20 @@ defmodule Mimicry.MockAPI do
 
     case response do
       {:ok, response = %Response{}} ->
-        {:ok, %{"value" => value} = _example} = response |> Example.choose(expected_example, spec)
+        example = response |> Example.choose(expected_example, spec)
 
-        headers = [
-          {"x-mimicry-description", response.description},
-          {"content-type", response.content_type}
-        ]
-
-        %{
-          status: response.status,
-          headers: default_headers(request_path, method, headers),
-          body: value
-        }
+        request_path |> respond_with(response, method, example)
 
       {:error, :not_found} ->
         %{
           status: :not_found,
+          headers: default_headers(request_path, method),
+          body: %{}
+        }
+
+      {:error, :no_examples} ->
+        %{
+          status: :not_implemented,
           headers: default_headers(request_path, method),
           body: %{}
         }
@@ -73,6 +71,29 @@ defmodule Mimicry.MockAPI do
 
   defp fallback(nil, fb), do: fb
   defp fallback(value, _), do: value
+
+  defp respond_with(path, _, method, {:error, :no_examples}) do
+    %{
+      status: :not_implemented,
+      headers: default_headers(path, method),
+      body: %{
+        error: "No examples for this response found"
+      }
+    }
+  end
+
+  defp respond_with(path, response, method, {:ok, %{"value" => value} = _example}) do
+    headers = [
+      {"x-mimicry-description", response.description},
+      {"content-type", response.content_type}
+    ]
+
+    %{
+      status: response.status,
+      headers: default_headers(path, method, headers),
+      body: value
+    }
+  end
 
   defp ensure_numerical(nil), do: nil
 
