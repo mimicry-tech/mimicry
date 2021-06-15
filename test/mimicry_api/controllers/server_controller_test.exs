@@ -3,7 +3,7 @@ defmodule MimicryApi.ServerControllerTest do
   use Mimicry.MockServerCase
 
   @tag server: "simple.yaml"
-  test "GET /", %{conn: conn} do
+  test "GET /__mimicry/", %{conn: conn} do
     conn = conn |> get(Routes.server_path(conn, :index))
     assert %{"servers" => servers} = conn |> json_response(:ok)
 

@@ -2,6 +2,7 @@ defmodule MimicryApi.ProxyController do
   use MimicryApi, :controller
 
   alias Mimicry.MockServerList
+  alias Mimicry.OpenAPI.Specification
 
   import MimicryApi.Response, only: [respond_with_mimicry: 3]
 
@@ -21,9 +22,17 @@ defmodule MimicryApi.ProxyController do
         end
 
       [] ->
+        hosts =
+          MockServerList.list_servers()
+          |> Enum.map(&Map.get(&1, :spec, %Specification{}))
+          |> Enum.map(&get_host/1)
+          |> Enum.reject(&is_nil/1)
+          |> Enum.uniq()
+
         conn
         |> json(%{
-          message: ~s(Use "X-Mimicry-Host" HTTP header to direct traffic to a registered API)
+          message: ~s(Use "X-Mimicry-Host" HTTP header to direct traffic to a registered API),
+          available_hosts: hosts
         })
     end
   end
@@ -41,4 +50,17 @@ defmodule MimicryApi.ProxyController do
     |> delete_resp_header("cache-control")
     |> put_resp_header("server", "Mimicry")
   end
+
+  defp get_host(%Specification{servers: []}), do: nil
+
+  defp get_host(%Specification{servers: servers, title: title, version: version}) do
+    servers
+    # NOTE: this is deliberate, as specs can have multiple hosts defined
+    |> List.first()
+    |> Map.take(["url"])
+    |> Enum.into(%{})
+    |> Map.merge(%{title: title, version: version})
+  end
+
+  defp get_host(%Specification{}), do: nil
 end
