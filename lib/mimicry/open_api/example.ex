@@ -9,7 +9,7 @@ defmodule Mimicry.OpenAPI.Example do
   chooses an example based on the defined examples for the response and the spec (for references)
   """
   @spec choose(Response.t(), String.t() | :random, Specification.t()) ::
-          {:ok, map()} | {:error, :not_found} | {:error, :no_examples}
+          {:ok, map()} | {:error, :not_found | :no_examples}
   def choose(
         response,
         reference_or_random,
