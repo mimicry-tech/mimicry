@@ -3,8 +3,6 @@ defmodule Mimicry.Utils.SpecificationFileReader do
   `SpecificationFileReader` provides functions around fiels given to Mimicry.
   """
 
-  alias Mimicry.OpenAPI.Specification
-
   @doc """
   attempts to read a file from the configured spec directory,
   retaining information about the extension of the file
@@ -22,6 +20,10 @@ defmodule Mimicry.Utils.SpecificationFileReader do
     end
   end
 
+  @doc """
+  Returns the file extension as an atom in order to determine which parser is used further
+  down the road.
+  """
   @spec extension(String.t()) :: atom()
   def extension(file) do
     case file |> Path.extname() do
