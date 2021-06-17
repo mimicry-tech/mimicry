@@ -11,8 +11,10 @@ defmodule Mimicry.Utils.SpecificationFolder do
   alias Mimicry.OpenAPI.{Parser, Specification}
 
   @doc """
-  will attempt to load all specifications in the configured folder
+  Will attempt to load all specifications in the configured folder
+  while preserving paths with the specifications
   """
+  @spec load_all() :: list()
   def load_all do
     if base_path() |> File.dir?() do
       load_all_deduplicated()
@@ -37,7 +39,7 @@ defmodule Mimicry.Utils.SpecificationFolder do
     |> Enum.map(&Path.basename/1)
     |> Enum.map(&Task.async(fn -> load(&1) end))
     |> Task.await_many()
-    |> Enum.filter(fn val -> val != :error end)
+    |> Enum.filter(fn {status, _, _} -> status != :error end)
     |> deduplicate()
   end
 
@@ -57,11 +59,12 @@ defmodule Mimicry.Utils.SpecificationFolder do
   defp load(path) do
     case load_file(path) do
       {content, ext} ->
-        Parser.parse(content, ext)
+        specification = Parser.parse(content, ext)
+        {:ok, specification, path}
 
       nil ->
         Logger.warn("Found invalid specification in Specification folder: #{path}")
-        :error
+        {:error, nil, path}
     end
   end
 
@@ -73,7 +76,7 @@ defmodule Mimicry.Utils.SpecificationFolder do
     |> Enum.uniq_by(&duplicate_condition/1)
   end
 
-  defp duplicate_condition(%Specification{title: title, version: version}) do
+  defp duplicate_condition({%Specification{title: title, version: version}, _}) do
     "#{title}-#{version}"
   end
 

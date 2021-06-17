@@ -5,6 +5,8 @@ defmodule Mimicry.Utils.SpecificationFileObserver do
   """
 
   alias Mimicry.Utils.{SpecificationFileReader, SpecificationFolder}
+  alias Mimicry.MockServerList
+  alias Mimicry.OpenAPI.Parser
 
   require Logger
 
@@ -17,19 +19,20 @@ defmodule Mimicry.Utils.SpecificationFileObserver do
   @impl true
   def init(_args) do
     {:ok, watcher_pid} = FileSystem.start_link(dirs: [SpecificationFolder.base_path()])
-    FileSystem.subscribe(watcher_pid)
+    watcher_pid |> FileSystem.subscribe()
     {:ok, %{watcher_pid: watcher_pid}}
   end
 
   @impl true
   def handle_info({:file_event, _watcher_pid, {path, events}}, state) do
+    Logger.metadata(path: path, events: events)
+
     case SpecificationFileReader.extension(path) do
       extension when extension in [:yaml, :json] ->
         path |> handle_file_event(events)
         {:noreply, state}
 
-      _ ->
-        Logger.info("Saw new file in #{path}, but not a specification!")
+      :unsupported ->
         {:noreply, state}
     end
   end
@@ -39,27 +42,50 @@ defmodule Mimicry.Utils.SpecificationFileObserver do
     {:noreply, state}
   end
 
-  defp handle_file_event(path, [:deleted]) do
-    IO.puts("Deleted #{path}")
-  end
+  defp handle_file_event(path, [:moved_from]) do
+    case path |> Path.basename() |> MockServerList.find_server_by_specification_path() do
+      {:ok, pid} ->
+        Logger.info("Removing")
+        pid |> MockServerList.delete_server()
 
-  defp handle_file_event(path, [:created]) do
-    IO.puts("Created #{path}")
+      _ ->
+        nil
+    end
   end
 
   defp handle_file_event(path, [:modified, :closed]) do
-    IO.puts("Modified #{path}")
-  end
-
-  defp handle_file_event(path, [:attribute]) do
-    IO.puts("New content #{path}")
+    path
+    |> parse()
+    |> upsert(path)
   end
 
   defp handle_file_event(path, [:moved_to]) do
-    IO.puts("Moved file: #{path}")
+    path
+    |> parse()
+    |> upsert(path)
   end
 
-  defp handle_file_event(_path, unsupported_events) do
-    unsupported_events |> IO.inspect()
+  defp handle_file_event(_path, _events) do
+    Logger.info("Unknown")
+  end
+
+  defp parse(path) do
+    {:ok, content, ext} = path |> SpecificationFileReader.read()
+    Parser.parse(content, ext)
+  end
+
+  defp upsert(spec, path) do
+    case path
+         |> Path.basename()
+         |> MockServerList.find_server_by_specification_path() do
+      {:ok, pid} ->
+        Logger.info("Reloading...")
+
+        pid |> MockServerList.update_server_specification(spec)
+
+      _ ->
+        Logger.info("Creating...")
+        spec |> MockServerList.create_server(path)
+    end
   end
 end

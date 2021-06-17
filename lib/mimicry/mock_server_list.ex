@@ -28,10 +28,10 @@ defmodule Mimicry.MockServerList do
 
   Idempotent, this will not create a duplicate for the same combination of `title` + `version`.
   """
-  @spec create_server(Specification.t()) ::
+  @spec create_server(Specification.t(), String.t()) ::
           {:ok, pid()} | {:error, :invalid_specification} | {:error, :unknown}
-  def create_server(spec) do
-    case start_mock_server(spec) do
+  def create_server(spec, file \\ "") do
+    case spec |> start_mock_server(file) do
       {:ok, pid} -> {:ok, pid}
       {:error, {:already_started, pid}} -> {:ok, pid}
       {:error, :invalid_specification} -> {:error, :invalid_specification}
@@ -99,6 +99,24 @@ defmodule Mimicry.MockServerList do
     end
   end
 
+  def find_server_by_specification_path(path) do
+    children()
+    |> Enum.find(fn pid ->
+      pid |> :sys.get_state() |> Keyword.get(:path) == path
+    end)
+    |> case do
+      nil ->
+        {:error, :not_found}
+
+      pid ->
+        {:ok, pid}
+    end
+  end
+
+  def update_server_specification(pid, spec = %Specification{}) do
+    pid |> MockServer.update_server_specification(spec)
+  end
+
   @doc """
   used to seed servers given via the spec folder upon startup
   """
@@ -121,20 +139,23 @@ defmodule Mimicry.MockServerList do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  defp start_mock_server(_spec = %Specification{supported: false}) do
+  defp start_mock_server({_, _spec = %Specification{supported: false}, _}) do
     {:error, :unsupported_spec}
   end
 
-  defp start_mock_server(spec = %Specification{}) do
-    child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec)
-    DynamicSupervisor.start_child(__MODULE__, child_spec)
-  rescue
-    e in RuntimeError ->
-      Logger.error(e.message, spec: spec)
-      {:error, :invalid_specification}
+  defp start_mock_server({:ok, spec = %Mimicry.OpenAPI.Specification{}, file_path}) do
+    child_spec = spec |> MockServer.create_id() |> MockServer.child_spec(spec, file_path)
+
+    case DynamicSupervisor.start_child(__MODULE__, child_spec) do
+      {:error, _} ->
+        :error
+
+      value ->
+        value
+    end
   end
 
-  defp start_mock_server(_), do: {:error, :invalid_specification}
+  defp start_mock_server(_, _), do: {:error, :invalid_specification}
 
   defp children do
     DynamicSupervisor.which_children(__MODULE__)
@@ -146,7 +167,7 @@ defmodule Mimicry.MockServerList do
     pid |> :sys.get_state() |> Keyword.take([:id, :entities, :spec]) |> Enum.into(%{})
   end
 
-  defp do_load_specification_on_startup(true) do
+  defp do_load_specification_on_startup(enabled?) when enabled? == true do
     SpecFolder.load_all()
     |> Enum.each(&start_mock_server/1)
   end

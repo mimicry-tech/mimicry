@@ -3,7 +3,7 @@ defmodule Mimicry.OpenAPI.Specification do
   Specification represents a single specification file (either YAML or JSON)
   """
   # @derive {Jason.Encoder, only: [:content]}
-  defstruct [:title, :content, :version, :openapi_version, :servers, supported: true]
+  defstruct [:title, :content, :version, :openapi_version, :servers, :path, supported: true]
 
   @doc """
   returns the representation of an unsupported specification
