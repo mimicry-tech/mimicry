@@ -4,9 +4,9 @@ defmodule Mimicry.Utils.SpecificationFileObserver do
   the specifications currently running in mimicry
   """
 
-  alias Mimicry.Utils.{SpecificationFileReader, SpecificationFolder}
   alias Mimicry.MockServerList
   alias Mimicry.OpenAPI.Parser
+  alias Mimicry.Utils.{SpecificationFileReader, SpecificationFolder}
 
   require Logger
 
