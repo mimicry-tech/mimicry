@@ -1,5 +1,8 @@
 FROM hexpm/elixir:1.11.4-erlang-24.0-alpine-3.13.3 as base
 
+RUN addgroup -g 1000 -S devgroup && adduser -u 1000 -S devuser -G devgroup
+USER devuser
+
 COPY .build-deps /
 RUN cat .build-deps | xargs apk add --no-cache
 
