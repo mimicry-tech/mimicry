@@ -6,6 +6,7 @@ services:
       context: .
       target: dev
     stdin_open: true
+    user: ${CURRENT_UID}:${CURRENT_GID}
     tty: true
     command: ./bin/start_dev_server
     volumes:

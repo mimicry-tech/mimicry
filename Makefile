@@ -1,3 +1,5 @@
+UID := $(shell id -u)
+GID := $(shell id -g)
 dc=docker-compose -f docker-compose.yml $(1)
 dc-run=$(call dc, run --rm dev $(1))
 mix-dev=$(call dc-run, mix do $(1) MIX_ENV=dev)
@@ -38,11 +40,11 @@ dev-config:
 build:
 	$(call dc, build)
 hex-deps:
-	$(call mix-dev, deps.get)
+	CURRENT_UID=$(UID) CURRENT_GID=$(GID) $(call mix-dev, deps.get)
 shell:
-	$(call dc-run, ash)
+	CURRENT_UID=$(UID) CURRENT_GID=$(GID) $(call dc-run, ash)
 iex:
-	$(call dc-run, iex -S mix)
+	CURRENT_UID=$(UID) CURRENT_GID=$(GID) $(call dc-run, iex -S mix)
 format:
 	$(call dc-run, mix format)
 check-formatted:
