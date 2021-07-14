@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.11.4-erlang-24.0-alpine-3.13.3 as base
+FROM hexpm/elixir:1.12.2-erlang-24.0.3-alpine-3.14.0 as base
 
 RUN addgroup -g 1000 -S devgroup && adduser -u 1000 -S devuser -G devgroup
 USER devuser
@@ -45,4 +45,3 @@ RUN find /app -executable -type f -exec chmod +x {} +
 RUN mkdir /specifications
 
 CMD [ "/app/bin/mimicry", "start" ]
-
