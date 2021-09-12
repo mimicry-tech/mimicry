@@ -3,33 +3,60 @@ defmodule MimicryApi.ServerController do
 
   alias Mimicry.{MockServer, MockServerList}
   alias Mimicry.OpenAPI.Parser, as: SpecParser
+  alias MimicryApi.Errors
 
   def index(conn, _params) do
     conn |> json(%{servers: MockServerList.list_servers()})
   end
 
-  def create(conn, %{"spec" => definition}) do
-    definition |> SpecParser.build_specification()
+  def create(conn, %{"json" => raw_definition}) do
+    spec = raw_definition |> SpecParser.parse_to_map(:json)
 
-    with spec <- definition |> SpecParser.build_specification(),
+    _create(conn, spec)
+  end
+
+  def create(conn, %{"yaml" => raw_definition}) do
+    spec = raw_definition |> SpecParser.parse_to_map(:yaml)
+    _create(conn, spec)
+  end
+
+  def create(conn, _) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{message: "Pass the raw spec either via 'yaml' or 'json' properties"})
+  end
+
+  defp _create(conn, definition) do
+    with :ok <- definition |> OpenAPIv3Validator.validate(),
+         spec <- definition |> SpecParser.build_specification(),
          {:ok, pid} <- MockServerList.create_server(spec),
          {:ok, %{id: id} = response} <- pid |> MockServer.get_details() do
       conn
       |> put_resp_header("x-mimicry-server-id", id |> to_string())
       |> json(response)
     else
+      {:error, errors} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{
+          message: "Invalid specification",
+          errors: errors |> Errors.make_errors_from_openapi_validation()
+        })
+
       {:error, :invalid_spec} ->
         conn |> put_status(:bad_request) |> json(%{message: "Invalid specification!"})
 
       {:error, _} ->
         conn |> put_status(:bad_request) |> json(%{message: "Invalid JSON"})
     end
-  end
-
-  def create(conn, _) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{message: "Missing 'spec' property!"})
+  rescue
+    FunctionClauseError ->
+      conn
+      |> put_status(:unprocessable_entity)
+      |> json(%{
+        message:
+          "Could not parse specification. Please use strings for response codes instead of integers."
+      })
   end
 
   def spec(conn = %Plug.Conn{req_headers: headers}, _params) do

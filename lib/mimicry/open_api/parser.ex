@@ -18,9 +18,11 @@ defmodule Mimicry.OpenAPI.Parser do
   def json(str), do: parse(str, :json)
 
   @doc """
-  parses a given string depending on its extension
+  parses a given string based on the extension to a Mimicry.Specifaction
+
+  If you need a map instead of the specification, see parse_to_map/2
   """
-  @spec parse(String.t(), :yaml | :json) :: Specification.t()
+  @spec parse(term(), :yaml | :json) :: Specification.t()
   def parse(str, atom) do
     str
     |> decoder(atom).()
@@ -36,9 +38,27 @@ defmodule Mimicry.OpenAPI.Parser do
   end
 
   @doc """
+  parses a given string to a map
+  """
+  @spec parse_to_map(any(), :yaml | :json) :: :error | any()
+  def parse_to_map(str, atom) do
+    str
+    |> decoder(atom).()
+    |> case do
+      {:ok, decoded} ->
+        decoded
+
+      {:error, err} ->
+        Logger.warn("Could not decode #{atom |> to_string() |> String.upcase()} specification")
+        Logger.error(err)
+        :error
+    end
+  end
+
+  @doc """
   builds a new Specification from inputs given
   """
-  @spec build_specification(map()) :: Specification.t()
+  @spec build_specification(any()) :: Specification.t()
   def build_specification(
         parsed = %{
           "info" => info,
@@ -65,6 +85,7 @@ defmodule Mimicry.OpenAPI.Parser do
       # NOTE: This cannot read multiple specifications in a YAML file as of yet
       :yaml -> &YamlElixir.read_from_string/1
       :json -> &Jason.decode/1
+      _ -> raise RuntimeError, "Unknown extension: #{atom}"
     end
   end
 end

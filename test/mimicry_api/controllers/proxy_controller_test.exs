@@ -69,6 +69,7 @@ defmodule MimicryApi.ProxyControllerTest do
     end
 
     @tag server: "simple.yaml"
+    @tag :focus
     test "GET / with an expected 404", %{conn: conn} do
       conn =
         conn

@@ -7,7 +7,7 @@ defmodule Mimicry.MockAPITest do
   describe "respond/2" do
     @tag specification: "products-with-examples.yaml"
     test "will respond with a specific path", %{conn: conn, specification: spec} do
-      %{status: 200, body: _, headers: _} = conn |> get("/products") |> MockAPI.respond(spec)
+      %{status: "200", body: _, headers: _} = conn |> get("/products") |> MockAPI.respond(spec)
     end
 
     @tag specification: "products-with-examples.yaml"
@@ -15,7 +15,7 @@ defmodule Mimicry.MockAPITest do
       conn: conn,
       specification: spec
     } do
-      %{status: 200, body: product, headers: _} =
+      %{status: "200", body: product, headers: _} =
         conn |> get("/products/foobar") |> MockAPI.respond(spec)
 
       assert product == %{

@@ -41,6 +41,7 @@ defmodule Mimicry.MixProject do
       {:phoenix, "~> 1.5"},
       {:plug_cowboy, "~> 2.4"},
       {:yaml_elixir, "~> 2.6"},
+      {:openapiv3_validator, "~> 0.1.0"},
 
       # dev
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},

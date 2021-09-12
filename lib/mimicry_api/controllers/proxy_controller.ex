@@ -41,7 +41,7 @@ defmodule MimicryApi.ProxyController do
     conn
     |> clean_default_headers()
     |> merge_resp_headers(headers)
-    |> put_status(status)
+    |> put_status(status |> as_integer())
     |> json(body)
   end
 
@@ -63,4 +63,11 @@ defmodule MimicryApi.ProxyController do
   end
 
   defp get_host(%Specification{}), do: nil
+
+  defp as_integer(val) do
+    case Integer.parse(val) do
+      {num, _} -> num
+      _ -> raise RuntimeError, message: "Cannot convert #{val} to proper response code"
+    end
+  end
 end
