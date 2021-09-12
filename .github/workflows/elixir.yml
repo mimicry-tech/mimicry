@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ main ]
 
+x-deps: &shared-dependencies
+  - name: Install inotify-tools
+    run: sudo apt-get install inotify-tools 
+
 jobs:
   build:
     name: OTP ${{matrix.otp}} | Elixir ${{matrix.elixir}}
@@ -35,7 +39,7 @@ jobs:
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
-
+    - *shared-dependencies
     - name: Install hex
       run: mix local.hex --force
     - name: Install rebar
@@ -47,7 +51,7 @@ jobs:
 
   quality:
     name: Code quality checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -67,6 +71,8 @@ jobs:
       with:
         otp-version: 23
         elixir-version: 1.11
+
+    - *shared-dependencies
 
     - name: Install hex
       run: mix local.hex --force
