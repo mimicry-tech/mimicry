@@ -13,7 +13,6 @@ defmodule MimicryApi.ProxyControllerTest do
     assert [Mimicry.version()] == conn |> get_resp_header("x-mimicry-version")
   end
 
-  @tag :reset_servers
   test "GET / shows available hosts to pass", %{conn: conn} do
     conn = conn |> get("/")
     assert %{"available_hosts" => hosts} = conn |> json_response(:ok)

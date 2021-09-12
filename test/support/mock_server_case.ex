@@ -42,19 +42,13 @@ defmodule Mimicry.MockServerCase do
 
   setup context do
     file_name = context |> Map.get(:server, false)
-    reset = context |> Map.get(:reset_servers, false)
 
     if file_name do
       :ok = clear_servers()
-      {:ok, server_pid} = add_server(file_name)
+      {:ok, _server_pid} = add_server(file_name)
 
-      on_exit(fn ->
-        MockServerList.delete_server(server_pid)
-      end)
-    end
-
-    if reset do
-      :ok = clear_servers()
+      # make sure server is cleared afterwards
+      on_exit(&clear_servers/0)
     end
 
     :ok
