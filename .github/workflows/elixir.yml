@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: OTP ${{matrix.otp}} | Elixir ${{matrix.elixir}}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -47,7 +47,7 @@ jobs:
 
   quality:
     name: Code quality checks
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
