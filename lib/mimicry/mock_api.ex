@@ -21,8 +21,6 @@ defmodule Mimicry.MockAPI do
       conn
       |> get_req_header("x-mimicry-expect-status")
       |> List.first()
-      # TODO: For JSON, all keys are strings, always
-      |> ensure_numerical()
       |> fallback("default")
 
     expected_example =
@@ -93,14 +91,5 @@ defmodule Mimicry.MockAPI do
       headers: default_headers(path, method, headers),
       body: value
     }
-  end
-
-  defp ensure_numerical(nil), do: nil
-
-  defp ensure_numerical(maybe_number) do
-    case Integer.parse(maybe_number) do
-      :error -> nil
-      {number, _} -> number
-    end
   end
 end

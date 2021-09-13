@@ -2,6 +2,8 @@ defmodule MimicryApi.ServerControllerTest do
   use MimicryApi.ConnCase
   use Mimicry.MockServerCase
 
+  import Fixtures
+
   @tag server: "simple.yaml"
   test "GET /__mimicry/", %{conn: conn} do
     conn = conn |> get(Routes.server_path(conn, :index))
@@ -23,28 +25,86 @@ defmodule MimicryApi.ServerControllerTest do
   describe "POST /" do
     test "when the payload is not a spec", %{conn: conn} do
       conn = conn |> post(Routes.server_path(conn, :create, %{}))
-      assert %{"message" => message} = conn |> json_response(:bad_request)
-      assert message =~ "Missing"
+      assert %{"message" => message} = conn |> json_response(:unprocessable_entity)
+      assert message =~ "Pass the raw spec"
 
-      conn = conn |> post(Routes.server_path(conn, :create, %{"spec" => %{"foobar" => "foo"}}))
+      conn = conn |> post(Routes.server_path(conn, :create, %{yaml: "foobar"}))
 
       assert %{"message" => message} = conn |> json_response(:bad_request)
       assert message =~ "Invalid"
     end
 
-    test "when the payload is a spec", %{conn: conn} do
-      spec = %{
-        "openapi" => "3.0.0",
-        "info" => %{"title" => "myFreshNewApi", "version" => "1.0.0alpha"},
-        "servers" => [
-          %{"url" => "https://fresh-api.testing.com"}
-        ],
-        "paths" => [%{"/" => %{}}]
-      }
+    test "when the payload is a YAML spec", %{conn: conn} do
+      spec = load_fixture("simple.yaml")
 
-      conn = conn |> post(Routes.server_path(conn, :create, %{"spec" => spec}))
+      conn =
+        conn
+        |> post(
+          Routes.server_path(conn, :create, %{
+            "yaml" => spec
+          })
+        )
+
       assert _ = conn |> json_response(:ok)
       assert [_server_id] = conn |> get_resp_header("x-mimicry-server-id")
+    end
+
+    test "when the payload is a JSON spec", %{conn: conn} do
+      spec = load_fixture("simple.json")
+
+      conn =
+        conn
+        |> post(
+          Routes.server_path(conn, :create, %{
+            "json" => spec
+          })
+        )
+
+      assert _ = conn |> json_response(:ok)
+      assert [_server_id] = conn |> get_resp_header("x-mimicry-server-id")
+    end
+
+    test "when the payload is an incomplete YAML spec", %{conn: conn} do
+      spec = "openapi: 3.0.0"
+
+      conn =
+        conn
+        |> post(Routes.server_path(conn, :create, %{yaml: spec}))
+
+      assert %{"message" => message, "errors" => errors} = conn |> json_response(:bad_request)
+      assert message =~ "Invalid"
+      assert errors |> length() > 0
+    end
+
+    test "when the payload is an incomplete JSON spec", %{conn: conn} do
+      spec = '''
+        { "openapi": "3.0.0" }
+      '''
+
+      conn =
+        conn
+        |> post(Routes.server_path(conn, :create, %{json: spec}))
+
+      assert %{"message" => message, "errors" => errors} = conn |> json_response(:bad_request)
+      assert message =~ "Invalid"
+      assert errors |> length() > 0
+    end
+
+    test "when the payload is YAML and contains integers as response codes", %{conn: conn} do
+      spec = load_fixture("simple-with-broken-integer.yaml")
+
+      conn =
+        conn
+        |> post(
+          Routes.server_path(conn, :create, %{
+            "yaml" => spec
+          })
+        )
+
+      assert %{"message" => message} = conn |> json_response(:unprocessable_entity)
+
+      assert message =~
+               "Could not parse specification"
     end
   end
 
@@ -55,23 +115,16 @@ defmodule MimicryApi.ServerControllerTest do
     end
 
     test "when deleting an existing server", %{conn: conn} do
-      spec = %{
-        "openapi" => "3.0.0",
-        "info" => %{"title" => "mySuperDeletableApi", "version" => "1.0.0alpha"},
-        "paths" => [%{"/" => %{"get" => %{"responses" => %{"valid" => "spec"}}}}],
-        "servers" => [
-          %{"url" => "https://fresh-deletable-api.testing.com"}
-        ]
-      }
+      spec = load_fixture("simple.yaml")
 
-      conn = conn |> post(Routes.server_path(conn, :create, %{"spec" => spec}))
+      conn = conn |> post(Routes.server_path(conn, :create, %{"yaml" => spec}))
       assert _ = conn |> json_response(:ok)
       assert [server_id] = conn |> get_resp_header("x-mimicry-server-id")
 
       conn = conn |> delete(Routes.server_path(conn, :delete, server_id))
       assert response = conn |> json_response(:ok)
 
-      assert response == spec
+      assert response == YamlElixir.read_from_string!(spec)
     end
   end
 end

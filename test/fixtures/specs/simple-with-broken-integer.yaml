@@ -28,7 +28,7 @@ paths:
                 simple-combined-example:
                   $ref: '#/components/examples/simple-message-example'
                   summary: 'simple example with overriden summary'
-        '404':
+        404: # <- this is the problem, while technically correct YAML, this will break the parser, since it need compat with JSON
           description: The response for when something is not found
           content:
             application/json:
