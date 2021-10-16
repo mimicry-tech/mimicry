@@ -64,7 +64,7 @@ paths:
               examples:
                 foobar:
                   $ref: '#/components/examples/my-cool-product'
-        404:
+        '404':
           description: Not found
           content:
             application/json:
