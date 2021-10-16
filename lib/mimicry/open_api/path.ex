@@ -6,9 +6,6 @@ defmodule Mimicry.OpenAPI.Path do
 
   alias Mimicry.OpenAPI.{Response, Specification}
 
-  def extract_response do
-  end
-
   def extract_response(
         spec = %Specification{content: %{"paths" => paths}},
         method,

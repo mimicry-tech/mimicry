@@ -55,8 +55,7 @@ defmodule Mimicry.OpenAPI.Parser do
     }
   end
 
-  def build_specification(spec = _) do
-    Logger.warn("Specification most likely invalid", specification: spec)
+  def build_specification(_) do
     Specification.unsupported()
   end
 

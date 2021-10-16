@@ -11,23 +11,37 @@ defmodule Mimicry.MockServer do
   @doc """
   gets the internal state of a mock server
   """
+  @spec get_details(pid()) :: map()
   def get_details(pid) do
     pid |> GenServer.call(:details)
   end
 
+  @doc """
+  Makes a request against a mock server process, returning a map with the details for the
+  actual response
+  """
+  @spec request(pid, Plug.Conn.t(), map()) :: map()
   def request(pid, conn = %Plug.Conn{}, _params = %{}) do
     pid |> GenServer.call({:request, conn})
   end
 
-  def child_spec(id, openapi_spec) do
+  @doc """
+  Creates a child spec for the `Mimicry.MockServerList`
+  """
+  @spec child_spec(atom(), Specification.t(), String.t()) :: map()
+  def child_spec(id, openapi_spec, path \\ "") do
     %{
       id: id,
-      start: {__MODULE__, :start_link, [[spec: openapi_spec, id: id]]},
+      start: {__MODULE__, :start_link, [[spec: openapi_spec, id: id, path: path]]},
       type: :worker
     }
   end
 
-  def start_link(state = [spec: _spec, id: id]) do
+  def update_server_specification(pid, spec = %Specification{}) do
+    pid |> GenServer.call({:update_spec, spec})
+  end
+
+  def start_link(state = [spec: _spec, id: id, path: _path]) do
     GenServer.start_link(__MODULE__, state, name: id)
   end
 
@@ -60,5 +74,10 @@ defmodule Mimicry.MockServer do
   def handle_call({:request, conn = %Plug.Conn{}}, _from, state) do
     spec = state |> Keyword.get(:spec, nil)
     {:reply, conn |> MockAPI.respond(spec), state}
+  end
+
+  @impl true
+  def handle_call({:update_spec, specification}, _from, state) do
+    {:reply, :ok, state |> Keyword.merge(spec: specification)}
   end
 end
