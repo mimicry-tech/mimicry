@@ -9,7 +9,7 @@ defmodule Mimicry.MockRepo do
   @doc """
   Given a speicification, find an example for a given reference
   """
-  def example(spec = %Specification{content: content}, reference) do
+  def example(_spec = %Specification{content: _content}, _reference) do
   end
 
   @doc """
