@@ -49,7 +49,7 @@ defmodule Mimicry.MixProject do
       {:dialyxir, "~> 1.1.0", only: [:dev], runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
-      {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]}
+      {:inch_ex, github: "asaaki/inch_ex", only: [:dev, :test]}
     ]
   end
 
