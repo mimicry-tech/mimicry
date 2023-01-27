@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.14.2-erlang-24.0.3-alpine-3.16.0 as base
+FROM hexpm/elixir:1.14.3-erlang-24.0.3-alpine-3.16.0 as base
 
 RUN addgroup -g 1000 -S devgroup && adduser -u 1000 -S devuser -G devgroup
 USER devuser
