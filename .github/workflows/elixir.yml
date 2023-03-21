@@ -15,27 +15,27 @@ jobs:
     strategy:
       matrix:
         otp: [25, 24]
-        elixir: ['1.14', '1.12', '1.11']
+        elixir: ['1.14', '1.13', '1.12']
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2.1.6
+    - uses: actions/checkout@v3
+    - uses: actions/cache@v3
       with:
         path: deps
         key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-mix-
-    - uses: actions/cache@v2.1.6
+    - uses: actions/cache@v3
       with:
         path: _build/ci
         key: ${{ runner.os }}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-build-
-    - uses: erlef/setup-beam@v1.9
+    - uses: erlef/setup-beam@v1.15.2
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
     - name: Install inotify-tools
-      run: sudo apt-get install inotify-tools 
+      run: sudo apt-get install inotify-tools
     - name: Install hex
       run: mix local.hex --force
     - name: Install rebar
@@ -50,26 +50,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2.1.6
+    - uses: actions/checkout@v3
+    - uses: actions/cache@v3
       with:
         path: deps
         key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-mix-
-    - uses: actions/cache@v2.1.6
+    - uses: actions/cache@v3
       with:
         path: _build/ci
         key: ${{ runner.os }}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-build-
-    - uses: erlef/setup-beam@v1.9
+    - uses: erlef/setup-beam@v1.15.2
       with:
-        otp-version: 23
-        elixir-version: 1.11
+        otp-version: 25
+        elixir-version: 1.14
 
     - name: Install inotify-tools
-      run: sudo apt-get install inotify-tools 
+      run: sudo apt-get install inotify-tools
     - name: Install hex
       run: mix local.hex --force
     - name: Install rebar
