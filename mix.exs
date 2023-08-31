@@ -46,7 +46,7 @@ defmodule Mimicry.MixProject do
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:dogma, "~> 0.1", only: :dev},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.3.0", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.4.1", only: [:dev], runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:inch_ex, github: "asaaki/inch_ex", only: [:dev, :test]}
